@@ -8,6 +8,10 @@
 *.toc
 *.pkl
 
+#ignore the venv
+venv/
+
+
 
 #Dersom man lager .gitignore etter man har 
 #fått søppelfiler, skriv følgende it terminalen:
