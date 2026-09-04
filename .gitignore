@@ -1,0 +1,15 @@
+# Ignore all .aux files
+*.aux
+# Ignoring all unnecessary files:
+*.log
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.toc
+*.pkl
+
+
+#Dersom man lager .gitignore etter man har 
+#fått søppelfiler, skriv følgende it terminalen:
+
+# git rm --cached <file>
