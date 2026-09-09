@@ -26,7 +26,7 @@ def spectral_linear_kdv_solver(u0_hat, L, T, dt, method= 'analytic'):
     k = np.fft.fftfreq(N, d=L/N) * 2 * np.pi
     
     # Time steps
-    num_steps = int(T / dt)
+    num_steps = max(int(T / dt),1)
     
     # Initialize solution array
     u_hat = np.zeros((num_steps, N), dtype=complex)
@@ -47,7 +47,7 @@ def spectral_linear_kdv_solver(u0_hat, L, T, dt, method= 'analytic'):
         if method == 'fe':
             # Forward Euler method for the linear KdV equation in Fourier space (unstable)
             for n in range(1, num_steps):
-                u_hat[n, :] = (1 + dt * (-1j * k**3)) * u_hat[n-1, :]
+                u_hat[n, :] = (1 + dt * (1j * k**3)) * u_hat[n-1, :]
 
     else:
         #analytic solution for the linear KdV equation in Fourier space
