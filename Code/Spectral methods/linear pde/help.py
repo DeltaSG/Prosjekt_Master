@@ -57,8 +57,8 @@ def animate_solution(x, u_hat):
 
 
 if __name__ == '__main__':
-    L = 5
-    N = 2**5
+    L = 50
+    N = 2**8
     T = 10
     dt = 1e-2
     x = make_x_array(N,L,True)
