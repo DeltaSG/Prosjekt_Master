@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
+from matplotlib.widgets import Slider
 
 
 def make_x_array(N:int , L:float , symmetric:bool) -> np.ndarray:
@@ -12,13 +13,34 @@ def make_x_array(N:int , L:float , symmetric:bool) -> np.ndarray:
     return x
 
 
-def animate_solution(x, u):
+def animate_solution(x, u, interval = 40):
     """Animates the solution u over the domain x"""
     N = u.shape[1]
     # x = make_x_array(N, L, symmetric=symmetric)
     # u = np.fft.ifft(u_hat, axis=1).real
 
     fig, ax = plt.subplots()
+    plt.subplots_adjust(bottom=0.25)
+
+    ax_speed = plt.axes([0.2, 0.1, 0.6, 0.03])
+    ax_stride = plt.axes([0.2, 0.15, 0.6, 0.03])
+
+    speed_slider = Slider(
+        ax = ax_speed,
+        label='Speed',
+        valmin=0.1,
+        valmax=2,
+        valinit=1
+        )
+
+    step_slider = Slider(
+        ax = ax_stride,
+        label='Stride',
+        valmin=1,
+        valmax=50,
+        valinit=10,
+        valstep=1
+    )
     t = 0 # Inital time
 
     ## Have not figured out how to represent it in the fourier space
@@ -33,25 +55,26 @@ def animate_solution(x, u):
         lw = 2
     )
 
-    steps = u.shape[0]
-    stride = max(steps//200 , 1)
-    frame_indices = np.arange(0,steps-1, stride)
 
 
+    current_frame = [0]
     def update(i):
-        n = frame_indices[i]
+        stride = int(step_slider.val)
+        speed = speed_slider.val
+        current_frame[0]+= (speed *stride)
+        n = int(current_frame[0]) % len(u)
         line_physical.set_ydata(u[n])
         return line_physical,
 
     anim = FuncAnimation(
         fig,
         update,
-        frames=len(frame_indices),
         repeat = True,
-        interval = 40,
+        interval = interval,
         blit = False,
         )
 
+    
     plt.show()
 
 
