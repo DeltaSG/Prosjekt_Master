@@ -141,7 +141,7 @@ if __name__ == '__main__':
     t,u_if = be.solve(method="IF") # Fourth order time acc
     t,u_ss = be.solve(method='SS') # Second order time acc
 
-    animate_solution(x,u_ss)
+    animate_solution(x,u_if)
 
     # for dt in [1e-1, 5e-2, 2.5e-2, 1.25e-2]:
     #     be = Burgers(u0, epsilon=1, L=L, dt=dt, T=1, safety_margin=0.9, save_every=1)

@@ -27,3 +27,7 @@ By integrating the IF formula over a $single$ time step $h$ we get
 
 An exact solution! All that is left is to approximate the integral (see Cox and Matthews)
 
+\subsection{Split Step}
+Solving a mixed problem is hard, however you can just solve them separate by taking smaller steps. Using the symmetric split step method you get a second order solution in time, 
+and it it quite simple to implement using the integrating factor for the linear part, and RK4 or some other solver for the nonlinear part. 
+Then one can combine the solutions. Take a half using the linear method, solve the nonlinearity and then take another halfstep. 
