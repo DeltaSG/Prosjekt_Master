@@ -37,17 +37,19 @@ def animate_solution(x, u_hat):
 
     steps = u.shape[0]
     stride = max(steps//200 , 1)
-    frame_indices = np.arange(0,steps, stride)
+    frame_indices = np.arange(0,steps-1, stride)
+
 
     def update(i):
         n = frame_indices[i]
         line_physical.set_ydata(u[n])
-        return line_physical
+        return line_physical,
 
     anim = FuncAnimation(
         fig,
         update,
-        frames=frame_indices,
+        frames=len(frame_indices),
+        repeat = True,
         interval = 40,
         blit = False,
         )
@@ -58,14 +60,14 @@ def animate_solution(x, u_hat):
 
 if __name__ == '__main__':
     L = 50
-    N = 2**8
-    T = 10
+    N = 2**9
+    T = 20
     dt = 1e-2
     x = make_x_array(N,L,True)
     u0 = np.exp(-x**2 / 5)
 
     init = linear_solver(u0,L)
-    Lk = lambda k: 1j*k
+    Lk = lambda k: 1j*k**3
     u_hat = init.solve(Lk,T,dt)
 
     animate_solution(x,u_hat)

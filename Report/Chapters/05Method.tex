@@ -1,0 +1,18 @@
+\section{Method}
+In this section the various methods utilized are presented. 
+
+\subsection{Integrating Factor}
+
+For the general PDE, $u_t = \mathcal{L}u + \mathcal{N}\left(u,t\right)$, multiplication by the exponetial $ e^{-Lt} $ reduces the problem to:
+\begin{align*}
+    v_t &= e^{-Lt}\mathcal{N}\left(e^{Lt}v\right) \\
+    v   &= e^{-Lt}u
+\end{align*}
+
+For purely linear problems this method gives an explicit solution
+\begin{equation}
+    u\left(x,t\right) &= u\left(x,0\right)e^{Lt},
+\end{equation}
+
+That can be effectivly computed using matrix products. 
+

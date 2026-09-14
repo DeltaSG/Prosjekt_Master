@@ -7,6 +7,7 @@
 # In the spectral space we then get u(t,x)= g(x)*e^{L*t} for any L 
 import numpy as np
 class linear_solver():
+    """Solves linear PDEs with the Integrating Factor method"""
     def __init__(self, u0, L):
         self.u0         =  u0
         self.u0hat      = np.fft.fft(u0)
@@ -18,11 +19,13 @@ class linear_solver():
         u_hat      = np.zeros((self.num_steps,self.N), dtype=complex)
 
         u_hat[0,:] = self.u0hat
+        time_arr = np.linspace(dt, T, self.num_steps-1)
+        u_hat[1:,:] = self.u0hat*np.exp(np.outer(time_arr,Lk(self.k)))
 
-        for n in range(1, self.num_steps):
-            u_hat[n,:] = u_hat[n-1,:]*np.exp(Lk(self.k) * dt)
 
         return u_hat
+
+
 
 
     if __name__ == '__main__':
