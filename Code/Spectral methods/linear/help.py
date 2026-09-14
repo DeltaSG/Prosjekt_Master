@@ -57,7 +57,7 @@ def animate_solution(x, u, interval = 40):
 
 
 
-    current_frame = [0]
+    current_frame = [0.0]
     def update(i):
         stride = int(step_slider.val)
         speed = speed_slider.val
@@ -69,6 +69,7 @@ def animate_solution(x, u, interval = 40):
     anim = FuncAnimation(
         fig,
         update,
+        frames= len(u),
         repeat = True,
         interval = interval,
         blit = False,
