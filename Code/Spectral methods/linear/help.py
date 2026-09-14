@@ -4,8 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 
-from lin_solver import linear_solver
-
 
 def make_x_array(N:int , L:float , symmetric:bool) -> np.ndarray:
     x = np.linspace(
@@ -14,11 +12,11 @@ def make_x_array(N:int , L:float , symmetric:bool) -> np.ndarray:
     return x
 
 
-def animate_solution(x, u_hat):
+def animate_solution(x, u):
     """Animates the solution u over the domain x"""
-    N = u_hat.shape[1]
+    N = u.shape[1]
     # x = make_x_array(N, L, symmetric=symmetric)
-    u = np.fft.ifft(u_hat, axis=1).real
+    # u = np.fft.ifft(u_hat, axis=1).real
 
     fig, ax = plt.subplots()
     t = 0 # Inital time
@@ -59,18 +57,7 @@ def animate_solution(x, u_hat):
 
 
 if __name__ == '__main__':
-    L = 50
-    N = 2**9
-    T = 20
-    dt = 1e-2
-    x = make_x_array(N,L,True)
-    u0 = np.exp(-x**2 / 5)
-
-    init = linear_solver(u0,L)
-    Lk = lambda k: 1j*k**3
-    u_hat = init.solve(Lk,T,dt)
-
-    animate_solution(x,u_hat)
+    pass
 
 
 

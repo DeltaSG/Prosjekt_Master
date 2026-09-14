@@ -11,8 +11,19 @@ For the general PDE, $u_t = \mathcal{L}u + \mathcal{N}\left(u,t\right)$, multipl
 
 For purely linear problems this method gives an explicit solution
 \begin{equation}
-    u\left(x,t\right) &= u\left(x,0\right)e^{Lt},
+    u\left(x,t\right) = u\left(x,0\right)e^{Lt},
 \end{equation}
 
 That can be effectivly computed using matrix products. 
+
+In the general case with \textit{Nonlinearities} one can use Runge-Kutta or other time-stepping methods.
+Based on the paper from Kassam and Trefethen \cite{ETD}, ETD methods seems to work quite well. 
+
+\subsection{Exponentital Time Differention}
+By integrating the IF formula over a $single$ time step $h$ we get
+\begin{equation}
+    u_{n+1} = e^{Lh}u_n + e^{Lh} \int_{0}^h e^{-L\tau} \mathcal{N}\left( u(t_n + \tau), t_n + \tau \right).
+\end{equation}
+
+An exact solution! All that is left is to approximate the integral (see Cox and Matthews)
 

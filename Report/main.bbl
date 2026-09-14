@@ -16,5 +16,39 @@
   {}
 \endgroup
 
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global}
+    \entry{ETD}{article}{}
+      \name{author}{2}{}{%
+        {{hash=9dec9d503b025abe2aaeea6c7d2a9f8b}{%
+           family={Kassam},
+           familyi={K\bibinitperiod},
+           given={Aly-Khan},
+           giveni={A\bibinithyphendelim K\bibinitperiod}}}%
+        {{hash=9c58887ccb77404d88f4789fce0a84e1}{%
+           family={Trefethen},
+           familyi={T\bibinitperiod},
+           given={LLoyd\bibnamedelima N.},
+           giveni={L\bibinitperiod\bibinitdelim N\bibinitperiod}}}%
+      }
+      \strng{namehash}{f283c480fe05e800cbfca328e3b61506}
+      \strng{fullhash}{f283c480fe05e800cbfca328e3b61506}
+      \strng{bibnamehash}{f283c480fe05e800cbfca328e3b61506}
+      \strng{authorbibnamehash}{f283c480fe05e800cbfca328e3b61506}
+      \strng{authornamehash}{f283c480fe05e800cbfca328e3b61506}
+      \strng{authorfullhash}{f283c480fe05e800cbfca328e3b61506}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{SIAM j. Sci. Comput}
+      \field{number}{4}
+      \field{title}{Fourth-order time-stepping for stiff PDEs}
+      \field{volume}{26}
+      \field{year}{2005}
+    \endentry
+  \enddatalist
+\endrefsection
 \endinput
 

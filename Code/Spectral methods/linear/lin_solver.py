@@ -6,7 +6,9 @@
 # Assuming the Fourier transformation of u exist for the initial condition u(0,*) = g(x)
 # In the spectral space we then get u(t,x)= g(x)*e^{L*t} for any L 
 import numpy as np
-class linear_solver():
+from help import *
+
+class LinearSolver():
     """Solves linear PDEs with the Integrating Factor method"""
     def __init__(self, u0, L):
         self.u0         =  u0
@@ -28,6 +30,17 @@ class linear_solver():
 
 
 
-    if __name__ == '__main__':
-        pass
+if __name__ == '__main__':
+    L = 50
+    N = 2**9
+    T = 20
+    dt = 1e-2
+    x = make_x_array(N,L,True)
+    u0 = np.exp(-x**2 / 5)
+
+    init = LinearSolver(u0,L)
+    Lk = lambda k: -1j*k**3
+    u_hat = init.solve(Lk,T,dt)
+    u = np.fft.fft(u_hat, axis = 1)
+    animate_solution(x,u)
         
