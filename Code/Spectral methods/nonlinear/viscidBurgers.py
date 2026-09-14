@@ -4,7 +4,6 @@
 
 import numpy as np
 from linear.help import *
-from linear.lin_solver import LinearSolver
 
 
 
@@ -28,7 +27,9 @@ class Burgers():
                           1j*self.k*self.u0_hat
                           ).real
                                             )
-
+        k = self.k
+        k_max = np.max(np.abs(k))
+        self.mask = (np.abs(k) < (2/3)*k_max)
         if min_slope >= 0:
              raise ValueError(
                 "min(u0') >= 0: No compressive region, characteristics never cross."
@@ -40,14 +41,10 @@ class Burgers():
     def nonlinear_rhs(self, u_hat_in):
         """RHS = -F[u*u_x], pseudospectrally, with 2/3 dealiasing"""
 
-        k = self.k
-        k_max = np.max(np.abs(k))
-        mask = (np.abs(k) < (2/3)*k_max)
-
         u = np.fft.ifft(u_hat_in).real
-        ux = np.fft.ifft(1j * k*u_hat_in).real
+        ux = np.fft.ifft(1j * self.k*u_hat_in).real
         nl_hat = np.fft.fft(u * ux)
-        nl_hat*=mask
+        nl_hat*=self.mask
         return -nl_hat
 
     def rk4_ETD(self, u_hat_in,E,E2, h):
@@ -128,6 +125,8 @@ class Burgers():
 
     def solve(self, method:str = "IF"):
         """Solves the Burgers' equation with the given method"""
+        # The code for the solvers can be merged and then it is just in the while loop one needs to figure out what method to use. 
+        # eg f(x) = IF if method == if elif method == ss f(x) = SS. This might not have any run time improvement but is easier to look at
         if method == 'IF':
             t_array, u_array , ts = self.integratingFactor()
 

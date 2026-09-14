@@ -26,6 +26,7 @@ class LinearSolver():
         return u_hat
 
     def step(u_in, Lk, dt:float):
+        # Made for the steps in the nonlinear solver, but is not needed there
         return u_in*np.exp(Lk * dt)
 
 
