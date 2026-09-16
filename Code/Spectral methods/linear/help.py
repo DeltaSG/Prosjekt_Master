@@ -12,6 +12,29 @@ def make_x_array(N:int , L:float , symmetric:bool) -> np.ndarray:
         ) if symmetric else np.linspace(0,L,N,endpoint = False)
     return x
 
+def conservationOnL(N,L,f= lambda x: 0.5*np.cos(2*x),g = lambda x: np.sin(x),Lk = lambda k: 1 - (k**2)/6):
+    """Testing inner product property of L.
+    N: Number of points in the array.
+    L: Domain of the array (symmetric).
+    f,g: Test-functions.
+    Lk: The spectral linear operator as a function of k.  """
+
+    x = make_x_array(N,L,symmetric=True)
+    dx = x[1]-x[0]
+
+    k = np.fft.fftfreq(N,d = dx)*2*np.pi
+
+    mk = Lk(k)
+
+    u = np.fft.fft(f(x))
+    v = np.fft.fft(g(x))
+
+    s1 = np.inner(mk*u, v)
+    s2 = np.inner(u, mk*v)
+    assert np.allclose(s1,s2, atol=1e-12) , "The Linear operator (Lk) is not self adjoint"
+    assert np.all(np.isreal(mk)), "The Linear operator (Lk) is not real"
+    return 0
+
 
 def animate_solution(x, u, interval = 40):
     """Animates the solution u over the domain x"""
@@ -81,7 +104,9 @@ def animate_solution(x, u, interval = 40):
 
 
 if __name__ == '__main__':
-    pass
+    N = 2**5
+    L = 2*np.pi 
+    conservationOnL(N,L)
 
 
 
