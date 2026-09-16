@@ -19,7 +19,7 @@ class KdV():
         self.L          = L
         dx              = L/self.N
         self.k          = np.fft.fftfreq(self.N,d=dx)*2*np.pi
-        self.Lk         = 1j*self.k**3
+        self.Lk         = 1j*(self.k**3)
         self.dt         = dt
         self.T          = T
         self.save       = save_every
@@ -158,19 +158,16 @@ if __name__ == '__main__':
     x = np.linspace(-L/2, L/2, N, endpoint=False) if sym else np.linspace(0, L, N, endpoint=False)
     # u0 = np.exp(-(x**2)/2)
     c = 4
-    u0 = (6)/np.cosh(x)**2
+    x_0 = np.pi
+    def u(x):
+        return (c/2) * 1/(np.cosh(np.sqrt(c)/2 *(x - x_0))**2)
+
+    u0 = u(x)
 
     be = KdV(u0 , L=L , dt = 1e-3, T = 5, save_every=1)
-    # t,u_if = be.solve(method="IF", set=False) # Fourth order time acc
-    # be.solve(method='SS', set=True) # Second order time acc
+    t,u_if = be.solve(method="IF", set=False) # Fourth order time acc
+    be.solve(method='SS', set=True) # Second order time acc
 
-    be.conservation(method = "SS")
+    # be.conservation(method = "SS")
 
-    # animate_solution(x,u_if)
-
-    # for dt in [1e-1, 5e-2, 2.5e-2, 1.25e-2]:
-    #     be = Burgers(u0, epsilon=1, L=L, dt=dt, T=1, safety_margin=0.9, save_every=1)
-    #     t, u_if, ts = be.solve(method="IF")
-    #     t2, u_ss, ts2 = be.solve(method="SS")
-    #     diff = np.max(np.abs(u_if - u_ss))
-    #     print(f"dt={dt:.4g}  max diff={diff:.4e}")
+    animate_solution(x,u_if)
