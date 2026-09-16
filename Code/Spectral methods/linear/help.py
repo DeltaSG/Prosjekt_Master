@@ -101,7 +101,37 @@ def animate_solution(x, u, interval = 40):
     
     plt.show()
 
+def mass(u,dx):
+    U = np.asarray(u)
+    return dx*np.sum(U, axis=-1)
 
+def l2(u,dx):
+    U = np.asarray(u)
+    return dx*np.sum(U**2, axis=-1)
+
+def hamiltonian(u,mk,dx):
+    """Working using Lu_x -> for KdV L = 1-k**2/6"""
+    U = np.asarray(u)
+    u_hat = np.fft.fft(U,axis=-1)
+    lu_hat = mk*u_hat
+    lu = np.fft.ifft(lu_hat, axis=-1)
+
+    H2 = 0.5*dx*np.sum(U*lu, axis=-1)
+    H3 = (dx/6)*np.sum(U**3, axis = -1)
+
+    return H2 + H3
+
+
+
+def conservationInfo(unit, name:str = "Mass"):
+    print(5*"-","Conservation of ", name , 5*"-" )
+    print(f"Initial {name}: {unit[0].real:.3f}")
+    print(f"Final {name}: {unit[-1].real:.3f}")
+    print(f"Maximum error: {(np.max(np.abs(unit -unit[0]).real)):.3f}")
+    print(f"Relative error: {((np.max(np.abs(unit -unit[0]))/unit[0].real)):.3f}")
+    print(30*"-")
+
+    
 
 if __name__ == '__main__':
     N = 2**5

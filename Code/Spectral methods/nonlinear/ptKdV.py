@@ -56,7 +56,7 @@ unknown_init = np.concatenate([phi_init,[c_init,B_init]])
 def build_jacobian_(phi, c, L_mat):
     
     J = np.zeros((N+2,N+2))
-    J[:N, :N] =     L_mat - c*np.eye(N) + np.diag(phi)
+    J[:N, :N] =     L_mat - c*np.eye(N) + np.diag(phi) # d(res)/dphi
     J[:N,N] =       -phi # d(res)/dc
     J[:N,N+1] =     -1 # d(res)/dB
     J[N,:N] =       1/N # d(mean_eq)/dphi

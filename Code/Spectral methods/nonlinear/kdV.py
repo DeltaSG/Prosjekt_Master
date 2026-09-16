@@ -112,9 +112,8 @@ class KdV():
                         u_list.append(np.fft.ifft(u_hat).real)
                         
         return np.array(t_list), np.array(u_list)
-         
 
-    def solve(self, method:str = "IF"):
+    def solve(self, method:str = "IF", set = True):
         """Solves the KdV' equation with the given method"""
         # The code for the solvers can be merged and then it is just in the while loop one needs to figure out what method to use. 
         # eg f(x) = IF if method == if elif method == ss f(x) = SS. This might not have any run time improvement but is easier to look at
@@ -124,7 +123,31 @@ class KdV():
         else: 
              t_array, u_array = self.splitStep()
 
-        return t_array, u_array
+        if set:
+             self.t_array = t_array
+             self.u =       u_array
+        else:
+            return t_array, u_array
+
+    def conservation(self, method = "IF"):
+        if not hasattr(self, "u"):
+            print("Solving PDE for u")
+            self.solve(method=method, set= True)
+
+        dx = self.L/self.N
+        u = self.u
+        #Mass
+        m = mass(u,dx)
+        conservationInfo(m,"Mass")
+        # L2
+        l = l2(u,dx)
+        conservationInfo(l, "L2")
+        #Hamiltonian
+        l = lambda k: 1-k**2/6
+        mk = l(self.k)
+        h = hamiltonian(u,mk,dx)
+        conservationInfo(h, "Hamiltonian")
+
 
 
 if __name__ == '__main__':
@@ -138,10 +161,12 @@ if __name__ == '__main__':
     u0 = (6)/np.cosh(x)**2
 
     be = KdV(u0 , L=L , dt = 1e-3, T = 5, save_every=1)
-    t,u_if = be.solve(method="IF") # Fourth order time acc
-    t,u_ss = be.solve(method='SS') # Second order time acc
+    # t,u_if = be.solve(method="IF", set=False) # Fourth order time acc
+    be.solve(method='IF', set=True) # Second order time acc
 
-    animate_solution(x,u_if)
+    be.conservation(method = "IF")
+
+    # animate_solution(x,u_if)
 
     # for dt in [1e-1, 5e-2, 2.5e-2, 1.25e-2]:
     #     be = Burgers(u0, epsilon=1, L=L, dt=dt, T=1, safety_margin=0.9, save_every=1)
