@@ -153,16 +153,16 @@ class KdV():
 if __name__ == '__main__':
 
     N = 2**8
-    L = 40
+    L = 80
     sym = True
     x = np.linspace(-L/2, L/2, N, endpoint=False) if sym else np.linspace(0, L, N, endpoint=False)
     # u0 = np.exp(-(x**2)/2)
     c = 4
     x_0 = np.pi
-    def u(x):
-        return (c/2) * 1/(np.cosh(np.sqrt(c)/2 *(x - x_0))**2)
+    def u(x,c, x0):
+        return (c/2) * 1/(np.cosh(np.sqrt(c)/2 *(x - x0))**2)
 
-    u0 = u(x)
+    u0 = u(x,c,x_0) + u(x, 10 , -np.pi)
 
     be = KdV(u0 , L=L , dt = 1e-3, T = 5, save_every=1)
     t,u_if = be.solve(method="IF", set=False) # Fourth order time acc

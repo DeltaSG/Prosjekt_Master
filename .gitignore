@@ -12,6 +12,9 @@
 venv/
 .env/
 
+# ignore cache
+__pycashe__/
+
 
 
 #Dersom man lager .gitignore etter man har 

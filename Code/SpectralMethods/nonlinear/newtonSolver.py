@@ -8,7 +8,7 @@ from scipy.optimize import root
 
 # --- Problem setup ------------
 N = 2**8
-P = 2*np.pi
+P = 8*np.pi
 
 
 # KdV linear symbol
@@ -17,7 +17,7 @@ def m_kdv(k):
 
 # Prescribed constraints
 phi_mean_prescribed =   0.0
-amp_prescribed =        1.0
+amp_prescribed =        0.1
 
 def build_grid_andL(N,P,symbol):
     x = np.linspace(0,P,N,endpoint=False)
@@ -46,8 +46,8 @@ def residual(phi, c, B, mk):
     return Lphi - c*phi + 0.5*phi**2 - B
 
 # --- Initial guess -------------
-phi_init = phi_mean_prescribed + amp_prescribed*np.cos(x)
-c_init = 1
+phi_init = phi_mean_prescribed + amp_prescribed*np.cos(2*np.pi*x/P)
+c_init = 1 #- (2*np.pi/P)**2 /6
 B_init = 0
 
 unknown_init = np.concatenate([phi_init,[c_init,B_init]])
@@ -60,9 +60,14 @@ def build_jacobian_(phi, c, L_mat):
     J[:N,N] =       -phi # d(res)/dc
     J[:N,N+1] =     -1 # d(res)/dB
     J[N,:N] =       1/N # d(mean_eq)/dphi
-    imax, imin =    np.argmax(phi), np.argmin(phi)
-    J[N+1,imax] +=  0.5
-    J[N+1, imin] -= 0.5
+    # imax, imin =    np.argmax(phi), np.argmin(phi)
+    # J[N+1,imax] +=  0.5
+    # J[N+1, imin] -= 0.5
+    j = np.arange(N)
+    J[N+1,:N] = np.cos(2*np.pi*j/N)/N
+    J[N+1,N] = 0
+    J[N+1,N+1]=0
+    
     return J
 
 def F_(unknown):
@@ -70,7 +75,9 @@ def F_(unknown):
     c,B = unknown[-2], unknown[-1]
     res = residual(phi,c,B, mk=mk)
     mean_eq = phi.mean() - phi_mean_prescribed
-    amp_eq  = (phi.max() - phi.min())/2 - amp_prescribed
+    # amp_eq = (np.max(phi)- np.min(phi))/2 - amp_prescribed
+    phi_hat = np.fft.fft(phi)/N
+    amp_eq  = np.real(phi_hat[1])- amp_prescribed/2
     return np.concatenate([res, [mean_eq, amp_eq]])
 
 def newton_solver(u0, tol=1e-10, maxit=50):
@@ -82,6 +89,8 @@ def newton_solver(u0, tol=1e-10, maxit=50):
         if np.linalg.norm(Fu) < tol:
             return u, it
         J = build_jacobian_(phi,c,L_mat)
+        print(it,r"$||Fu||_2$:" ,np.linalg.norm(Fu))
+        print(r"$Cond(J)$:",np.linalg.cond(J))
         delta = np.linalg.solve(J, -Fu)
         u += delta
     raise RuntimeError("No Convergence")
@@ -98,3 +107,7 @@ print("Constant B = ", B_sol)
 plt.plot(x,phi_sol)
 
 plt.show()
+
+phi_hat = np.fft.fft(phi_sol)/N
+for n in range(15):
+    print(n, abs(phi_hat[n]))
