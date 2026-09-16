@@ -131,7 +131,7 @@ class KdV():
 
     def conservation(self, method = "IF"):
         if not hasattr(self, "u"):
-            print("Solving PDE for u")
+            print("Solving PDE for u using: ", method)
             self.solve(method=method, set= True)
 
         dx = self.L/self.N
@@ -160,11 +160,11 @@ if __name__ == '__main__':
     c = 4
     u0 = (6)/np.cosh(x)**2
 
-    be = KdV(u0 , L=L , dt = 1e-3, T = 5, save_every=1)
+    be = KdV(u0 , L=L , dt = 1e-4, T = 5, save_every=1)
     # t,u_if = be.solve(method="IF", set=False) # Fourth order time acc
-    be.solve(method='IF', set=True) # Second order time acc
+    # be.solve(method='SS', set=True) # Second order time acc
 
-    be.conservation(method = "IF")
+    be.conservation(method = "SS")
 
     # animate_solution(x,u_if)
 
