@@ -17,8 +17,8 @@ class KdV():
         
         self.N          = len(u0)
         self.L          = L
-        dx              = L/N
-        self.k          = np.fft.fftfreq(N,d=dx)*2*np.pi
+        dx              = L/self.N
+        self.k          = np.fft.fftfreq(self.N,d=dx)*2*np.pi
         self.Lk         = 1j*self.k**3
         self.dt         = dt
         self.T          = T
@@ -160,7 +160,7 @@ if __name__ == '__main__':
     c = 4
     u0 = (6)/np.cosh(x)**2
 
-    be = KdV(u0 , L=L , dt = 1e-4, T = 5, save_every=1)
+    be = KdV(u0 , L=L , dt = 1e-3, T = 5, save_every=1)
     # t,u_if = be.solve(method="IF", set=False) # Fourth order time acc
     # be.solve(method='SS', set=True) # Second order time acc
 
