@@ -153,10 +153,11 @@ if __name__ == '__main__':
     #rfft wave numbers
     k = 2*np.pi*np.fft.rfftfreq(N,dx)
     mk = 1- k**2/6
-    
+    mask = (np.abs(k) < (2/3)*np.max(np.abs(k)))
+
     
     u, mk,mask = solve_with_continuation(P=P, amp_target=amp, N=N, mean = mean)
-    
+    # u = newton(u0,mk,mask,mean,amp,N)
     phi_hat = u[:-2]
     c_sol , B_sol = u[-2], u[-1]
     phi_sol = np.fft.irfft(phi_hat, N)
