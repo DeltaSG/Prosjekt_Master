@@ -8,7 +8,7 @@ from scipy.optimize import root
 
 # --- Problem setup ------------
 N = 2**8
-P = 8*np.pi
+P = 2*np.pi
 
 
 # KdV linear symbol
@@ -17,7 +17,7 @@ def m_kdv(k):
 
 # Prescribed constraints
 phi_mean_prescribed =   0.0
-amp_prescribed =        0.1
+amp_prescribed =        0.05
 
 def build_grid_andL(N,P,symbol):
     x = np.linspace(0,P,N,endpoint=False)
@@ -89,8 +89,8 @@ def newton_solver(u0, tol=1e-10, maxit=50):
         if np.linalg.norm(Fu) < tol:
             return u, it
         J = build_jacobian_(phi,c,L_mat)
-        print(it,r"$||Fu||_2$:" ,np.linalg.norm(Fu))
-        print(r"$Cond(J)$:",np.linalg.cond(J))
+        # print(it,r"$||Fu||_2$:" ,np.linalg.norm(Fu))
+        # print(r"$Cond(J)$:",np.linalg.cond(J))
         delta = np.linalg.solve(J, -Fu)
         u += delta
     raise RuntimeError("No Convergence")
@@ -103,11 +103,13 @@ c_sol, B_sol = sol[-2], sol[-1]
 print("Converged after #", it , "iterations")
 print("wave speed c = ", c_sol)
 print("Constant B = ", B_sol)
+print(f"amplitude = {(np.max(phi_sol) - np.min(phi_sol))/2}")
 
 plt.plot(x,phi_sol)
 
 plt.show()
 
-phi_hat = np.fft.fft(phi_sol)/N
-for n in range(15):
-    print(n, abs(phi_hat[n]))
+
+# phi_hat = np.fft.fft(phi_sol)/N
+# for n in range(15):
+#     print(n, abs(phi_hat[n]))

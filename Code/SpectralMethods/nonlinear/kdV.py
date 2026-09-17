@@ -121,11 +121,11 @@ class KdV():
             t_array, u_array = self.integratingFactor()
 
         else: 
-             t_array, u_array = self.splitStep()
+            t_array, u_array = self.splitStep()
 
         if set:
-             self.t_array = t_array
-             self.u =       u_array
+            self.t_array = t_array
+            self.u =       u_array
         else:
             return t_array, u_array
 
