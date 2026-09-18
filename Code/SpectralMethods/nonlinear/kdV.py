@@ -213,23 +213,24 @@ class KdV():
 if __name__ == '__main__':
 
     N = 2**8
-    L = 2*np.pi
-    sym = False
+    L = 4*np.pi
+    sym = True
     x = np.linspace(-L/2, L/2, N, endpoint=False) if sym else np.linspace(0, L, N, endpoint=False)
     # u0 = np.exp(-(x**2)/2)
     c = 4
     x_0 = np.pi
-    def u(x,c, x0):
-        return (c/2) * 1/(np.cosh(np.sqrt(c)/2 *(x - x0))**2)
+    # def u(x,c, x0):
+    #     return (c/2) * 1/(np.cosh(np.sqrt(c)/2 *(x - x0))**2)
 
-    u0 = u(x,c,x_0) #+ u(x, 10 , -np.pi)
+    # u0 = u(x,c,x_0) + u(x, 10 , -np.pi)
 
-    # u, mk, mask = solve_with_continuation(P=L, amp_target=1, N=N, mean = 0)
-    # u0 = np.fft.irfft(u, N)
+    u, mk, mask = solve_with_continuation(P=L, amp_target=1, N=N, mean = 4)
+
+    u0 = np.fft.irfft(u, N)
     be = KdV(u0 , L=L , dt = 5e-4, T = 5, save_every=1)
     t,u_if = be.solve(method="SS", set=False) # Second order time acc
     # be.solve(method='SS', set=True) # Second order time acc
 
-    # be.conservation(method = "SS")
+    be.conservation(method = "SS")
 
     animate_solution(x,u_if)
