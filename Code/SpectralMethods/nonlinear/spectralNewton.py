@@ -16,9 +16,9 @@ def physical_solution(phi_hat, N):
     return np.fft.irfft(phi_hat, n=N)
 
 def nonlinear_hat(phi_hat,N, mask):
-    phi = physical_solution(phi_hat,N)
+    phi = physical_solution(phi_hat*mask,N)
     nl = 0.5*phi**2
-    return np.fft.rfft(nl)*mask
+    return np.fft.rfft(nl)
 
 def residual(u,mk,mask,mean,amp,N):
     M = len(mk)-1
