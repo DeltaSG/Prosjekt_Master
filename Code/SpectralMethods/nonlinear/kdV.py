@@ -224,13 +224,13 @@ if __name__ == '__main__':
 
     # u0 = u(x,c,x_0) + u(x, 10 , -np.pi)
 
-    u, mk, mask = solve_with_continuation(P=L, amp_target=1, N=N, mean = 4)
+    u, mk, mask = solve_with_continuation(P=L, amp_target=1, N=N, mean = 0.0)
 
     u0 = np.fft.irfft(u, N)
     be = KdV(u0 , L=L , dt = 5e-4, T = 5, save_every=1)
     t,u_if = be.solve(method="SS", set=False) # Second order time acc
     # be.solve(method='SS', set=True) # Second order time acc
 
-    be.conservation(method = "SS")
+    # be.conservation(method = "SS")
 
     animate_solution(x,u_if)

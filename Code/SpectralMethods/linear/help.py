@@ -128,7 +128,7 @@ def conservationInfo(unit, name:str = "Mass"):
     print(f"Initial {name}: {unit[0].real:.3f}")
     print(f"Final {name}: {unit[-1].real:.3f}")
     print(f"Maximum error: {(np.max(np.abs(unit -unit[0]).real)):.3f}")
-    print(f"Relative error: {((np.max(np.abs(unit -unit[0]))/unit[0].real)):.3f}")
+    print(f"Relative error: {((np.max(np.abs(unit -unit[0]))/np.abs(unit[0]).real)):.3f}")
     print(30*"-")
 
     
