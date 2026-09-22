@@ -164,7 +164,7 @@ if __name__ == '__main__':
     print(f"amplitude = {(np.max(phi_sol) - np.min(phi_sol))/2}")
 
     
-    print(f"Wave speed c= {c_sol}")
+    print(f"Wave speed c = {c_sol}")
     print(f"Constant B = {B_sol}")
     
     plt.plot(x, phi_sol)
