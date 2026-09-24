@@ -14,7 +14,9 @@ class Soliton():
     def wave(self, t,x):
         t = np.atleast_1d(t)[:,None]
         x = np.atleast_1d(x)[None,:]
+        
         self.eta = (self.c/2) * 1/(np.cosh(np.sqrt(self.c)/2 *(x- self.c*t - self.x0))**2)
+        return self.eta
     
     
 # ---------------------
@@ -32,9 +34,9 @@ if __name__ == '__main__':
     t_array = np.linspace(0,T,4)
     
     wave = Soliton(c)
-    wave.wave(t_array,x_array)
     
-    print(wave.eta.shape)
+    
+    print(wave.wave(t_array,x_array))
     
     eta_hatx = np.fft.fft(wave.eta, axis=1)
     k = 2*np.pi*np.fft.fftfreq(N, d=(x_array[1]-x_array[0]))

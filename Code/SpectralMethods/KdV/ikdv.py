@@ -14,11 +14,13 @@ class Packet():
         self.c_list  = c_list
         self.x0_list = x0_list
         
+        self.L = L
+        self.N = N
+        self.T = T
+        self.M = M
         self.x       = make_x_array(N, L, symmetric=True)
-        self.t       = make_x_array(M,T, symmetric=False)
         
         self.k = 2*np.pi*np.fft.fftfreq(N, d=(self.x[1]-self.x[0]))
-        self.w = 2*np.pi*np.fft.fftfreq(M, d=(self.t[1]-self.t[0]))
         
         return
 
@@ -29,11 +31,17 @@ class Packet():
         dHdt_hat_list   = []
         
         for c,x0  in zip(self.c_list, self.x0_list):
-            eta = Soliton(c,x0).wave(self.t, self.x).eta
+            
+            T_c = self.L / c
+            t_c = make_x_array(self.M,T_c, symmetric=False)
+            
+            w = 2*np.pi*nf.fftfreq(self.M, d= t_c[1]-t_c[0])
+            
+            eta = Soliton(c,x0).wave(t_c, self.x)
             eta_hat  = nf.fft(eta,      axis=1)
             eta2_hat = nf.fft(eta**2,   axis=1)
             detadt_hat = nf.ifft(
-                1j*self.w[:,None] * nf.fft(
+                1j*w[:,None] * nf.fft(
                     eta_hat , axis = 0),
                 axis = 0)
             phi_hat_list.append(eta_hat)
@@ -69,4 +77,74 @@ class Packet():
         self.n   = X[:,1]
         
         return X
-        
+
+
+if __name__ == '__main__':
+    c_list  = np.array([0.3, 0.6, 1.0])   # wider spread, more of them
+    x0_list = np.zeros_like(c_list)
+    
+    N = 2**8
+    L = 200
+    
+    M = 10**2
+    T = 5
+    
+    wp = Packet(L,N,T,M,c_list,x0_list)
+    wp.make_solitons()
+    wp.LSM()
+    
+    order = np.argsort(wp.k)
+    k   = wp.k[order]
+    ell = wp.ell[order]
+    n   = wp.n[order]
+    
+    
+    H_sorted = wp.H[:,0,order]
+    
+    
+    # for i, c in enumerate(c_list):
+    #     plt.semilogy(wp.k[order], np.abs(wp.H[i, 0, :])[order], label=f'c={c}')
+    # plt.xlabel(r'$\xi$'); plt.ylabel(r'$|\hat H(\xi)|$')
+    # plt.legend(); plt.show()
+    
+    fig, axes = plt.subplots(2, 2, figsize=(10, 4))
+
+    idx =  N//8
+    a_neg = N//2 - idx
+    a_pos = N//2 +idx 
+    
+    ell_theory = 1j * k**3
+    n_theory   = -3j * k
+
+    axes[0,0].plot(k[a_neg:a_pos], ell[a_neg:a_pos].imag, '.', label='estimated Im($\\ell$)')
+    axes[0,0].plot(k[a_neg:a_pos], ell_theory[a_neg:a_pos].imag, '-', label=r'theory: $\xi^3$')
+    axes[0,0].set_xlabel(r'$\xi$')
+    axes[0,0].set_ylabel(r'Im($\ell$)')
+    axes[0,0].set_title(r'$\ell(\xi)$')
+    axes[0,0].legend()
+
+    axes[0,1].plot(k[a_neg:a_pos], n[a_neg:a_pos].imag, '.', label='estimated Im($n$)')
+    axes[0,1].plot(k[a_neg:a_pos], n_theory[a_neg:a_pos].imag, '-', label=r'theory: $-3\xi$')
+    axes[0,1].set_xlabel(r'$\xi$')
+    axes[0,1].set_ylabel(r'Im($n$)')
+    axes[0,1].set_title(r'$n(\xi)$')
+    axes[0,1].legend()
+    
+    for i,c in enumerate(c_list):
+        axes[1,0].plot(k[a_neg:a_pos], H_sorted[i, a_neg:a_pos].real, label=f'c={c}')
+        axes[1,1].plot(k[a_neg:a_pos], H_sorted[i, a_neg:a_pos].imag, label=f'c={c}')
+    axes[1,0].set_xlabel(r'$\xi$')
+    axes[1,0].set_ylabel(r'Re($\eta$)')
+    # axes[1,0].set_title(r'$H(\xi)$')
+    axes[1,0].legend()
+    
+    axes[1,1].set_xlabel(r'$\xi$')
+    axes[1,1].set_ylabel(r'Im($\eta$)')
+    # axes[1,1].set_title(r'$n(\xi)$')
+    axes[1,1].legend()
+
+    plt.tight_layout()
+    plt.show()
+
+    # print("max |Re(ell)|:", np.max(np.abs(ell.real)))
+    # print("max |Re(n)|:  ", np.max(np.abs(n.real)))
