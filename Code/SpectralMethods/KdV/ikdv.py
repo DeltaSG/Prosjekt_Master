@@ -80,11 +80,11 @@ class Packet():
 
 
 if __name__ == '__main__':
-    c_list  = np.array([0.3, 0.6, 1.0])   # wider spread, more of them
+    c_list  = np.array([ 0.5, 1.0, 1.5 , 2])   # wider spread, more of them
     x0_list = np.zeros_like(c_list)
     
-    N = 2**8
-    L = 200
+    N = 2**6
+    L = 60
     
     M = 10**2
     T = 5
@@ -109,15 +109,16 @@ if __name__ == '__main__':
     
     fig, axes = plt.subplots(2, 2, figsize=(10, 4))
 
-    idx =  N//8
+    idx = int(L/(2*np.pi)+1) #N//8  #N//2 -1 
     a_neg = N//2 - idx
     a_pos = N//2 +idx 
     
     ell_theory = 1j * k**3
-    n_theory   = -3j * k
+    n_theory   = -3j* k
 
     axes[0,0].plot(k[a_neg:a_pos], ell[a_neg:a_pos].imag, '.', label='estimated Im($\\ell$)')
     axes[0,0].plot(k[a_neg:a_pos], ell_theory[a_neg:a_pos].imag, '-', label=r'theory: $\xi^3$')
+    
     axes[0,0].set_xlabel(r'$\xi$')
     axes[0,0].set_ylabel(r'Im($\ell$)')
     axes[0,0].set_title(r'$\ell(\xi)$')
