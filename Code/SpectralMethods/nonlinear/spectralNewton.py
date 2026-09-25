@@ -3,7 +3,7 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
 def build_phi_hat(u,N):
-    phi_hat =       np.zeros(N+1, dtype=complex)
+    # phi_hat =       np.zeros(N+1, dtype=complex)
     
     phi_hat =   u[:-2]
     # phi_hat[0] =    mean
@@ -133,12 +133,27 @@ def solve_with_continuation(P, amp_target, N, mean=0.0, n_steps=50,mask=None, **
 
     return u, mk, mask
 
+
+
+def rfft_to_full(rhat):
+    N = 2*(len(rhat) - 1)
+    full = np.empty(N, dtype=complex)
+    full[:(len(rhat)-2)] =  - np.conj(rhat[1:-1][::-1])
+    full[(len(rhat)-2):] =  rhat
+    return full
+
+
+def find_idx(phi_hat):
+    idx = 1
+    while phi_hat[idx] >= 1e-9: #Same as N-tol not as strict
+        idx += 1
+    return idx
 if __name__ == '__main__':
-    N =     2**8 # Full spectrum
+    N =     2**4 # Full spectrum
     M =     N//2 # Real spectrum
-    amp =   1
+    amp =   0.05
     mean =  0.0
-    P =     8*np.pi
+    P =     2*np.pi
     
     u0 = np.zeros(M+3)
     u0[0] = N*mean
@@ -166,6 +181,17 @@ if __name__ == '__main__':
     
     print(f"Wave speed c = {c_sol}")
     print(f"Constant B = {B_sol}")
+
+    idx = find_idx(phi_hat)
+    print(f"Solution {idx = }")
+
+    k_f = rfft_to_full(k[:idx]).real
+    phi_hat_f = rfft_to_full(phi_hat[:idx]).real
+
+    # print(f"{k_f = }")
+    # print(f"{k = }")
     
-    plt.plot(x, phi_sol)
+    # plt.plot(x, phi_sol)
+    plt.plot(k_f, phi_hat_f, '-*')
+
     plt.show()

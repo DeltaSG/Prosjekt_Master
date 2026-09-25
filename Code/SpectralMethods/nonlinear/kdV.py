@@ -231,6 +231,6 @@ if __name__ == '__main__':
     t,u_if = be.solve(method="SS", set=False) # Second order time acc
     # be.solve(method='SS', set=True) # Second order time acc
 
-    # be.conservation(method = "SS")
+    be.conservation(method = "SS")
 
     animate_solution(x,u_if)
