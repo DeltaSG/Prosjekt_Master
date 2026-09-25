@@ -7,6 +7,7 @@ import numpy.fft as nf
 import matplotlib.pyplot as plt 
 from KdV.soliton import Soliton
 from linear.help import make_x_array
+from linear.help import animate_solution
 
 class Packet():
     """Collection of waves for LSM"""
@@ -90,10 +91,11 @@ if __name__ == '__main__':
     x0_list = np.zeros_like(c_list)
     
     N = 2**8
-    L = 80
+    L = 60 #2*np.pi
+
+    T = 1
+    M = 60*T # 30fps
     
-    M = 10**2
-    T = 5
     
     wp = Packet(L,N,T,M,c_list,x0_list)
     wp.make_solitons()
@@ -106,16 +108,26 @@ if __name__ == '__main__':
     
     
     H_sorted = wp.H[:,0,order]
+    # H_sorted_2 = wp.H[0,2,order]
+
+    # print(wp.H.shape)
+
+    # dhdt = wp.dHdt[0,3,order]
+    # d_eta_x = -1j*wp.k[order]*wp.H[0,3,order]*wp.c_list[0]
     
+    # plt.plot(wp.k[order], dhdt, label = 'dHdt')
+    # plt.plot(wp.k[order], d_eta_x, alpha = 0.5 , linestyle = '--' , label = 'iku_x')
+    # plt.legend()
+    # plt.show()
     
-    # for i, c in enumerate(c_list):
-    #     plt.semilogy(wp.k[order], np.abs(wp.H[i, 0, :])[order], label=f'c={c}')
-    # plt.xlabel(r'$\xi$'); plt.ylabel(r'$|\hat H(\xi)|$')
-    # plt.legend(); plt.show()
+    for i, c in enumerate(c_list):
+        plt.semilogy(wp.k[order], np.abs(wp.H[i, 0, :])[order], label=f'c={c}')
+    plt.xlabel(r'$\xi$'); plt.ylabel(r'$|\hat H(\xi)|$')
+    plt.legend(); plt.show()
     
     fig, axes = plt.subplots(2, 2, figsize=(10, 4))
 
-    idx = int(3*L/(4*np.pi)+1)   #N//8   N//2 -1
+    idx = N//8   #   N//2 -1 int(3*L/(4*np.pi)+1)
     a_neg = N//2 - idx
     a_pos = N//2 +idx 
     
@@ -152,6 +164,8 @@ if __name__ == '__main__':
     plt.grid()
     plt.tight_layout()
     plt.show()
+
+    animate_solution(k,wp.H[0,:,order].T)
 
     # print("max |Re(ell)|:", np.max(np.abs(ell.real)))
     # print("max |Re(n)|:  ", np.max(np.abs(n.real)))

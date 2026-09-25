@@ -119,7 +119,10 @@ def solve_with_continuation(P, amp_target, N, mean=0.0, n_steps=50,mask=None, **
     M = N//2
     dx = P/N
     k = 2*np.pi*np.fft.rfftfreq(N, dx)
-    mk = 1 - k**2/6
+    # mk = 1 - k**2/6
+    with np.errstate(divide='ignore', invalid='ignore'):
+        mk = np.sqrt(np.tanh(k)/k)
+    mk[0] = 1
     if mask is None:
         mask = (np.abs(k) < (2/3)*np.max(np.abs(k)))
     
@@ -149,7 +152,7 @@ def find_idx(phi_hat):
         idx += 1
     return idx
 if __name__ == '__main__':
-    N =     2**4 # Full spectrum
+    N =     2**8 # Full spectrum
     M =     N//2 # Real spectrum
     amp =   0.05
     mean =  0.0
@@ -191,7 +194,13 @@ if __name__ == '__main__':
     # print(f"{k_f = }")
     # print(f"{k = }")
     
-    # plt.plot(x, phi_sol)
-    plt.plot(k_f, phi_hat_f, '-*')
+    fig, axes = plt.subplots(1,2)
+    axes[0].plot(x, phi_sol , label = r"$\phi$")
+    axes[1].plot(k_f, phi_hat_f, '-*', label = r"$\hat{\phi}$")
+
+    axes[0].grid()
+    axes[0].legend()
+    axes[1].grid()
+    axes[1].legend()
 
     plt.show()

@@ -219,15 +219,15 @@ if __name__ == '__main__':
     # u0 = np.exp(-(x**2)/2)
     c = 4
     x_0 = np.pi
-    # def u(x,c, x0):
-    #     return (c/2) * 1/(np.cosh(np.sqrt(c)/2 *(x - x0))**2)
+    def u(x,c, x0):
+        return (c/2) * 1/(np.cosh(np.sqrt(c)/2 *(x - x0))**2)
 
-    # u0 = u(x,c,x_0) + u(x, 10 , -np.pi)
+    u0_ = u(x,c,x_0)
 
-    u, mk, mask = solve_with_continuation(P=L, amp_target=1, N=N, mean = 0.0)
+    # u, mk, mask = solve_with_continuation(P=L, amp_target=1, N=N, mean = 0.0)
 
-    u0 = np.fft.irfft(u, N)
-    be = KdV(u0 , L=L , dt = 5e-4, T = 5, save_every=1)
+    # u0 = np.fft.irfft(u0_, N)
+    be = KdV(u0_ , L=L , dt = 5e-4, T = 5, save_every=1)
     t,u_if = be.solve(method="SS", set=False) # Second order time acc
     # be.solve(method='SS', set=True) # Second order time acc
 
