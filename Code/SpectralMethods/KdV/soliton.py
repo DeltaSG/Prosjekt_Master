@@ -21,10 +21,10 @@ class Soliton():
     
 # ---------------------
 if __name__ == '__main__':
-    # c_list = np.array([0.5,1])
-    # eta_list = []
-    # for c in c_list:
-    #     eta_list.append(Soliton(c))
+    c_list = np.array([0.5,1])
+    eta_list = []
+    for c in c_list:
+        eta_list.append(Soliton(c))
     
     c = 1.0
     N = 2**4
@@ -32,6 +32,7 @@ if __name__ == '__main__':
     T = 1
     x_array = np.linspace(-L/2, L/2 , N, endpoint=False)
     t_array = np.linspace(0,T,4)
+    t = 0
     
     wave = Soliton(c)
     
@@ -43,15 +44,16 @@ if __name__ == '__main__':
     w = 2*np.pi*np.fft.fftfreq(4, d=(t_array[1]-t_array[0]))
 
     
-    deta_dt_hat = nf.ifft(1j*w[:,None] * nf.fft(eta_hatx , axis = 0), axis = 0)
-    print(deta_dt_hat.shape)
+    # deta_dt_hat = nf.ifft(1j*w[:,None] * nf.fft(eta_hatx , axis = 0), axis = 0)
+    # print(deta_dt_hat.shape)
     # order = np.argsort(k)
-    # plt.plot(k[order],eta_hatx[1,order])
+    # # plt.plot(k[order],eta_hatx[1,order])
     # plt.show()
-    # for eta in eta_list:
-    #     eta.wave(t,x_array)
-        
-    # for eta in eta_list:
-    #     plt.plot(x_array,eta.eta[0,:] , label = f"c:{eta.c}")
-    # plt.legend()
-    # plt.show()
+    order = np.argsort(k)
+    fig, axes = plt.subplots(1,2)
+    for eta in eta_list:
+        w = eta.wave(t,x_array)
+        axes[0].plot(x_array,w[0,:] , label = f"c:{eta.c}")
+        axes[1].plot(k[order], nf.fft(w[0,:])[order], label = f"c:{eta.c}")
+    plt.legend()
+    plt.show()

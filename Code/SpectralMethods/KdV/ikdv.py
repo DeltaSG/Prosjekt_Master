@@ -39,7 +39,13 @@ class Packet():
             
             eta = Soliton(c,x0).wave(t_c, self.x)
             eta_hat  = nf.fft(eta,      axis=1)
-            eta2_hat = nf.fft(eta**2,   axis=1)
+            # H2 with 2/3 mask dealiasing
+            k_max = np.max(np.abs(self.k))
+            mask = (np.abs(self.k) < (2/3)*k_max)
+            # mask = np.ones_like(eta)
+            eta_m = nf.ifft(eta_hat*mask)
+            eta2_hat = nf.fft((eta_m)**2,   axis=1)
+
             detadt_hat = nf.ifft(
                 1j*w[:,None] * nf.fft(
                     eta_hat , axis = 0),
@@ -83,8 +89,8 @@ if __name__ == '__main__':
     c_list  = np.array([ 0.5, 1.0, 1.5 , 2])   # wider spread, more of them
     x0_list = np.zeros_like(c_list)
     
-    N = 2**6
-    L = 60
+    N = 2**8
+    L = 80
     
     M = 10**2
     T = 5
@@ -109,7 +115,7 @@ if __name__ == '__main__':
     
     fig, axes = plt.subplots(2, 2, figsize=(10, 4))
 
-    idx = int(L/(2*np.pi)+1) #N//8  #N//2 -1 
+    idx = int(3*L/(4*np.pi)+1)   #N//8   N//2 -1
     a_neg = N//2 - idx
     a_pos = N//2 +idx 
     
@@ -143,7 +149,7 @@ if __name__ == '__main__':
     axes[1,1].set_ylabel(r'Im($\eta$)')
     # axes[1,1].set_title(r'$n(\xi)$')
     axes[1,1].legend()
-
+    plt.grid()
     plt.tight_layout()
     plt.show()
 

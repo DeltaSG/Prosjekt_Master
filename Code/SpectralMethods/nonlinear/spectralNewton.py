@@ -183,7 +183,7 @@ if __name__ == '__main__':
     print(f"Constant B = {B_sol}")
 
     idx = find_idx(phi_hat)
-    print(f"Solution {idx = }")
+    print(f"Solution {idx = }") # What sould be used for LSM
 
     k_f = rfft_to_full(k[:idx]).real
     phi_hat_f = rfft_to_full(phi_hat[:idx]).real
