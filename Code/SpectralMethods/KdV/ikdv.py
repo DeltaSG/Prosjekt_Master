@@ -91,7 +91,7 @@ if __name__ == '__main__':
     x0_list = np.zeros_like(c_list)
     
     N = 2**8
-    L = 60 #2*np.pi
+    L = 2*2*np.pi
 
     T = 1
     M = 60*T # 30fps
@@ -120,16 +120,16 @@ if __name__ == '__main__':
     # plt.legend()
     # plt.show()
     
-    for i, c in enumerate(c_list):
-        plt.semilogy(wp.k[order], np.abs(wp.H[i, 0, :])[order], label=f'c={c}')
-    plt.xlabel(r'$\xi$'); plt.ylabel(r'$|\hat H(\xi)|$')
-    plt.legend(); plt.show()
+    # for i, c in enumerate(c_list):
+    #     plt.semilogy(wp.k[order], np.abs(wp.H[i, 0, :])[order], label=f'c={c}')
+    # plt.xlabel(r'$\xi$'); plt.ylabel(r'$|\hat H(\xi)|$')
+    # plt.legend(); plt.show()
     
     fig, axes = plt.subplots(2, 2, figsize=(10, 4))
 
-    idx = N//8   #   N//2 -1 int(3*L/(4*np.pi)+1)
+    idx = int(3*L/(4*np.pi)+1)   #   N//2 -1  N//8
     a_neg = N//2 - idx
-    a_pos = N//2 +idx 
+    a_pos = N//2 +idx +1
     
     ell_theory = 1j * k**3
     n_theory   = -3j* k

@@ -156,11 +156,16 @@ class WhithamSolver(SpectralSolver):
 
 class fKdVSolver(SpectralSolver):
     def __init__(self, P, target_amp, mean, N, alpha):
-        self.alpha = alpha
-        super().__init__(P, target_amp, mean, N)
-    
-    def diespersion(self, k):        
-        return 1 - np.abs(k)**self.alpha / 6
+         self.alpha = alpha
+         super().__init__(P, target_amp, mean, N)
+        
+    def diespersion(self, k):
+        if self.alpha < 0:
+            mk = np.zeros_like(k)
+            nz = k != 0
+            mk[nz] = - np.abs(k[nz])**self.alpha
+            return mk     
+        return - np.abs(k)**self.alpha
 
 
 

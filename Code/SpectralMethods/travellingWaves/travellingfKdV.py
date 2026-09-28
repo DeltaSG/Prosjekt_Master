@@ -8,7 +8,7 @@ from linear.help import *
 # Creating a travelling wave:
 P = 10 *2*np.pi
 N = 2**8
-alpha = 2
+alpha = -1/2
 
 amp_target = 0.05
 mean = 0.0
