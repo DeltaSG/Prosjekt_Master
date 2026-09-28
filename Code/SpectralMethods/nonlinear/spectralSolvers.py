@@ -1,4 +1,5 @@
 # Class for the spectral solver, look at plan point 5.1 
+# HSG 28.09
 import numpy as np 
 import numpy.fft as nf
 import matplotlib.pyplot as plt 

@@ -35,6 +35,14 @@ def conservationOnL(N,L,f= lambda x: 0.5*np.cos(2*x),g = lambda x: np.sin(x),Lk 
     assert np.all(np.isreal(mk)), "The Linear operator (Lk) is not real"
     return 0
 
+def pad(u,N):
+    Npad = 3*N//2
+    u_pad = np.zeros(Npad, dtype=complex)
+    half = N//2
+    u_pad[:half]      = u[:half]
+    u_pad[-(half-1):]   = u[-(half-1):]
+
+    return u_pad
 
 def animate_solution(x, u, interval = 40):
     """Animates the solution u over the domain x"""
