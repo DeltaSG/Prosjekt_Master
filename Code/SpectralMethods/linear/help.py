@@ -52,6 +52,7 @@ def animate_solution(x, u, interval = 40):
 
     fig, ax = plt.subplots()
     plt.subplots_adjust(bottom=0.25)
+    ax.grid(True)
 
     ax_speed = plt.axes([0.2, 0.1, 0.6, 0.03])
     ax_stride = plt.axes([0.2, 0.15, 0.6, 0.03])
@@ -105,9 +106,9 @@ def animate_solution(x, u, interval = 40):
         interval = interval,
         blit = False,
         )
-
-    
-    plt.show()
+  
+    # plt.close(fig)
+    return anim
 
 def mass(u,dx):
     U = np.asarray(u)

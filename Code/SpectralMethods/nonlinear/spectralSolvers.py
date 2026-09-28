@@ -154,13 +154,13 @@ class WhithamSolver(SpectralSolver):
         mk[nz] = np.sqrt( np.tanh(k[nz]) / k[nz])
         return mk
 
-class fKdVSovler(SpectralSolver):
+class fKdVSolver(SpectralSolver):
     def __init__(self, P, target_amp, mean, N, alpha):
         self.alpha = alpha
         super().__init__(P, target_amp, mean, N)
     
     def diespersion(self, k):        
-        return 1 - np.abs(k)**self.alpha
+        return 1 - np.abs(k)**self.alpha / 6
 
 
 
@@ -196,7 +196,7 @@ if __name__ == '__main__':
     whitham.solve_w_continuation()
     # witham._plot_()
 
-    fkdv = fKdVSovler(P,amp, mean, N, alpha= 1)
+    fkdv = fKdVSolver(P,amp, mean, N, alpha= 2) # Same as KdV
     fkdv.solve_w_continuation()
     # fkdv._plot_()
 

@@ -11,11 +11,16 @@ from linear.help import *
 from nonlinear.spectralSolvers import *
 
 class Solver(ABC):
-    def __init__(self, u0, P, dt, T, save_every:int = 1):
-        self.u0 = u0
-        self.u0_hat = nf.fft(u0)
+    def __init__(self, P, dt, T,u0 = None, u0_hat = None, save_every:int = 1):
+        if u0 is not None:
+            self.u0 = u0
+            self.u0_hat = nf.fft(u0)
+        elif u0_hat is not None:
+             self.u0_hat = u0_hat
+             self.u0 = nf.ifft(u0_hat)
+        else: raise ValueError("u0 or u0_hat must not be given.")
 
-        self.N  = len(u0)
+        self.N  = len(self.u0)
         self.N2 = self.N//2
         self.Npad = 3*self.N//2
         self.P  = P
@@ -43,7 +48,7 @@ class Solver(ABC):
         nl_hat = np.zeros(self.N, dtype=complex)
         nl_hat[:self.N2] = nl_hat_pad[:self.N2]
         nl_hat[-(self.N2-1):] = nl_hat_pad[-(self.N2-1):]
-        rhs = -3*nl_hat
+        rhs = -nl_hat/2
         return rhs
 
     def rk4_step(self, u_hat_in, h):
@@ -102,7 +107,7 @@ class Solver(ABC):
 
 class KdV(Solver):
      def dispersion(self, k):
-         return 1 - k**2
+         return 1 - k**2 /6
 
 class Whitham(Solver):
      def dispersion(self, k):
@@ -112,12 +117,12 @@ class Whitham(Solver):
         return mk
 
 class fKdV(Solver):
-     def __init__(self, P, target_amp, mean, N, alpha):
+     def __init__(self, P, dt, T, alpha,u0 = None, u0_hat = None, save_every:int = 1):
              self.alpha = alpha
-             super().__init__(P, target_amp, mean, N)
+             super().__init__( P = P,dt=dt, T=T, u0=u0, u0_hat=u0_hat, save_every=save_every)
          
      def dispersion(self, k):        
-        return 1 - np.abs(k)**self.alpha
+        return 1 - np.abs(k)**self.alpha / 6
 
 
 if __name__ == '__main__':
@@ -133,7 +138,8 @@ if __name__ == '__main__':
      
      u0 = soliton(x,c,x0)
 
-     kdv = KdV(u0, P,dt= 5e-4, T=1)
+     kdv = KdV(u0=u0, P=P,dt= 5e-4, T=1)
      t, u = kdv.splitStep()
 
-     animate_solution(x,u)
+     anim = animate_solution(x,u)
+     plt.show()
