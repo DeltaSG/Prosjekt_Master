@@ -165,7 +165,7 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.show()
 
-    animate_solution(k,wp.H[0,:,order].T)
+    # animate_solution(k,wp.H[0,:,order].T)
 
     # print("max |Re(ell)|:", np.max(np.abs(ell.real)))
     # print("max |Re(n)|:  ", np.max(np.abs(n.real)))

@@ -6,7 +6,7 @@
 
 import numpy as np
 from linear.help import *
-from nonlinear.spectralNewton import solve_with_continuation
+from Code.SpectralMethods.old.spectralNewton import solve_with_continuation
 
 
 
