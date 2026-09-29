@@ -121,6 +121,9 @@ class SpectralSolver(ABC):
             u = self.newton(u, amp)
 
         self.u = u
+        self.phi_hat = self.u[:-2]
+        self.c       = self.u[-2]
+        self.B       = self.u[-1]
 
     def _plot_(self):
         phi_hat = self.u[:-2]
@@ -144,10 +147,12 @@ class SpectralSolver(ABC):
 
 
 class KdVSolver(SpectralSolver):
+    """Newton solver for KdV"""
     def diespersion(self, k):
         return 1 - k**2 /6
 
 class WhithamSolver(SpectralSolver):
+    """Newton solver for Whithams k"""
     def diespersion(self, k):
         mk = np.ones_like(k)
         nz = k != 0
@@ -155,6 +160,7 @@ class WhithamSolver(SpectralSolver):
         return mk
 
 class fKdVSolver(SpectralSolver):
+    """Newton solver for fKdV"""
     def __init__(self, P, target_amp, mean, N, alpha):
          self.alpha = alpha
          super().__init__(P, target_amp, mean, N)

@@ -106,10 +106,12 @@ class Solver(ABC):
             conservationInfo(h, "Hamiltonian")
 
 class KdV(Solver):
+     """Solving the KdV equation over time (0,T)"""
      def dispersion(self, k):
          return 1 - k**2 /6
 
 class Whitham(Solver):
+     """Solving the Withams equation over time (0,T)"""
      def dispersion(self, k):
         mk = np.ones_like(k)
         nz = k != 0
@@ -117,6 +119,7 @@ class Whitham(Solver):
         return mk
 
 class fKdV(Solver):
+     """Solving the fKdV equation over time (0,T)"""
      def __init__(self, P, dt, T, alpha,u0 = None, u0_hat = None, save_every:int = 1):
              self.alpha = alpha
              super().__init__( P = P,dt=dt, T=T, u0=u0, u0_hat=u0_hat, save_every=save_every)
