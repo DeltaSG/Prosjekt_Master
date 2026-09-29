@@ -35,14 +35,14 @@ def conservationOnL(N,L,f= lambda x: 0.5*np.cos(2*x),g = lambda x: np.sin(x),Lk 
     assert np.all(np.isreal(mk)), "The Linear operator (Lk) is not real"
     return 0
 
-def pad(u,N):
+def pad(u_hat, N):
+    """Zero-pad a spectrum (..., N) to (..., 3N/2) along the last axis."""
     Npad = 3*N//2
-    u_pad = np.zeros(Npad, dtype=complex)
     half = N//2
-    u_pad[:half]      = u[:half]
-    u_pad[-(half-1):]   = u[-(half-1):]
-
-    return u_pad
+    out = np.zeros(u_hat.shape[:-1] + (Npad,), dtype=complex)
+    out[..., :half]        = u_hat[..., :half]
+    out[..., -(half-1):]   = u_hat[..., -(half-1):]   # Nyquist mode dropped
+    return out
 
 def animate_solution(x, u, interval = 40):
     """Animates the solution u over the domain x"""

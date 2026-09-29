@@ -91,7 +91,7 @@ if __name__ == '__main__':
     x0_list = np.zeros_like(c_list)
     
     N = 2**8
-    L = 2*2*np.pi
+    L = 20*2*np.pi
 
     T = 1
     M = 60*T # 30fps
@@ -127,7 +127,7 @@ if __name__ == '__main__':
     
     fig, axes = plt.subplots(2, 2, figsize=(10, 4))
 
-    idx = int(3*L/(4*np.pi)+1)   #   N//2 -1  N//8
+    idx = int(3*L/(4*np.pi)+1)   #    N//8
     a_neg = N//2 - idx
     a_pos = N//2 +idx +1
     

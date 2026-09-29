@@ -6,6 +6,9 @@ import numpy as np
 import numpy.fft as nf
 import matplotlib.pyplot as plt 
 
+#Dårlig implementering, er ikke symmetrisk! Fungerer kun når x er sym om 0. 
+# Dette gir feilen i ikdv når x ikke er sym. 
+
 class Soliton():
     def __init__(self, c, x0=0.0):
         self.c  = c
@@ -27,8 +30,8 @@ if __name__ == '__main__':
         eta_list.append(Soliton(c))
     
     c = 1.0
-    N = 2**4
-    L = 2*np.pi
+    N = 2**5
+    L = 20
     T = 1
     x_array = np.linspace(-L/2, L/2 , N, endpoint=False)
     t_array = np.linspace(0,T,4)
