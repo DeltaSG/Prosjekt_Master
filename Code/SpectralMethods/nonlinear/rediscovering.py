@@ -33,6 +33,10 @@ class WaveCollection(ABC):
     def wave_solver(self, u0):
         """Override with the PDE solver"""
 
+    @abstractmethod
+    def symbol(self,k):
+        """Override with the methods symbols l and n"""
+
     def make_travelling_waves(self):
         H0 = []
 
@@ -80,7 +84,7 @@ class WaveCollection(ABC):
             nl_hat_list.append(eta2_hat)
             dHdt_hat_list.append(dEtadt)
         
-        H =     np.stack(eta_hat_list,  axis=0)
+        self.H =     np.stack(eta_hat_list,  axis=0)
         H2=     np.stack(nl_hat_list,   axis=0)
         dHdt =  np.stack(dHdt_hat_list, axis=0)
 
@@ -89,7 +93,7 @@ class WaveCollection(ABC):
             arr = np.moveaxis(arr, -1,0)
             return arr.reshape(arr.shape[0], -1)
 
-        Hr      = to_freq_first(H)
+        Hr      = to_freq_first(self.H)
         H2r     = to_freq_first(H2)
         dHdtr   = to_freq_first(dHdt)
 
@@ -116,7 +120,7 @@ class WaveCollection(ABC):
 
 
     def _plot_(self, idx = None):
-        fig, axes = plt.subplots(1,2,figsize = (10,4))
+        fig, axes = plt.subplots(2,2,figsize = (10,4))
         if idx is None:
             idx = int(3*self.P/(4*np.pi) +1)
         a_neg = N//2 - idx
@@ -125,32 +129,46 @@ class WaveCollection(ABC):
         order = np.argsort(self.k)
         k = self.k[order]
 
-        ell_theory = 1- (k**2)/6
+        ell_theory = self.symbol(k)
         n_theory   = np.ones_like(k) / 2
 
         ell = self.ell[order]
         ell[k==0] = np.nan
         n = self.n[order]
         n[k==0] = np.nan
+
+        H_sorted = self.H[:,0,order]
     
-        axes[0].plot(k[a_neg:a_pos], ell[a_neg:a_pos].real, '.', label=r'estimated $\mathbb{Re}(\ell)$')
-        axes[0].plot(k[a_neg:a_pos], ell_theory[a_neg:a_pos].real, '-', label=r'theory: $1-\xi^2/6$')
+        axes[0,0].plot(k[a_neg:a_pos], ell[a_neg:a_pos].real, '.', label=r'estimated $\mathbb{Re}(\ell)$')
+        axes[0,0].plot(k[a_neg:a_pos], ell_theory[a_neg:a_pos].real, '-', label='theory')
     
-        axes[0].set_xlabel(r'$\xi$')
-        axes[0].set_ylabel(r'Im($\ell$)')
-        axes[0].set_title(r'$\ell(\xi)$')
-        axes[0].legend()
+        axes[0,0].set_xlabel(r'$\xi$')
+        axes[0,0].set_ylabel(r'Re($\ell$)')
+        axes[0,0].set_title(r'$\ell(\xi)$')
+        axes[0,0].legend()
     
-        axes[1].plot(k[a_neg:a_pos], n[a_neg:a_pos].real, '.', label='estimated Re($n$)')
-        axes[1].plot(k[a_neg:a_pos], n_theory[a_neg:a_pos].real, '-', label=r'theory: $0.5$')
-        axes[1].set_xlabel(r'$\xi$')
-        axes[1].set_ylabel(r'Im($n$)')
-        axes[1].set_title(r'$n(\xi)$')
-        axes[1].legend()
+        axes[0,1].plot(k[a_neg:a_pos], n[a_neg:a_pos].real, '.', label='estimated Re($n$)')
+        axes[0,1].plot(k[a_neg:a_pos], n_theory[a_neg:a_pos].real, '-', label=r'theory: $0.5$')
+        axes[0,1].set_xlabel(r'$\xi$')
+        axes[0,1].set_ylabel(r'Re($n$)')
+        axes[0,1].set_title(r'$n(\xi)$')
+        axes[0,1].legend()
         
         
-        axes[1].grid()
-        axes[0].grid()
+        axes[0,0].grid()
+        axes[0,1].grid()
+
+        for i,amp in enumerate(self.amp_list):
+            axes[1,0].plot(k[a_neg:a_pos], H_sorted[i, a_neg:a_pos].real, label=f'amp={amp}')
+            axes[1,1].plot(k[a_neg:a_pos], H_sorted[i, a_neg:a_pos].imag, label=f'amp={amp}')
+        axes[1,0].set_xlabel(r'$\xi$')
+        axes[1,0].set_ylabel(r'Re$\widehat{\eta}$')
+        axes[1,1].set_ylabel(r'Im$\widehat{\eta}$')
+        # axes[1,0].set_title(r'$H(\xi)$')
+        axes[1,1].legend()
+        axes[1,0].grid()
+        axes[1,1].grid()
+
         plt.tight_layout()
         plt.show()
 
@@ -164,19 +182,49 @@ class KdVLSM(WaveCollection):
     def wave_solver(self, u0):
         return KdV(self.P, self.dt, self.T,u0=u0)
 
+    def symbol(self,k):
+        return 1-k**2 / 6
+
+class fKdVLSM(WaveCollection):
+    def __init__(self, P, N, dt, T, amp_list, mean_list, alpha):
+        self.alpha = alpha
+        super().__init__(P, N, dt, T, amp_list, mean_list)
+
+    def wave_function(self, target_amp, mean):
+        return fKdVSolver(P = self.P, target_amp=target_amp, mean=mean, N = self.N , alpha=self.alpha)
+    def wave_solver(self, u0):
+        return fKdV(P=P, dt = self.dt, T=self.T, alpha=self.alpha, u0=u0)
+
+    def symbol(self,k):
+        if self.alpha < 0:
+            mk = np.zeros_like(k)
+            nz = k != 0
+            mk[nz] = - np.abs(k[nz])**self.alpha
+            return mk     
+        return - np.abs(k)**self.alpha
+        
+
+class WhithamLSM(WaveCollection):
+    def wave_function(self, target_amp, mean):
+        return WhithamSolver(P=self.P, target_amp= target_amp, mean=mean, N = self.N)
+    def wave_solver(self, u0):
+        return Whitham(self.P, self.dt, self.T,u0=u0)
+
+    def symbol(self,k):
+        mk = np.ones_like(k)
+        nz = k != 0
+        mk[nz] = np.sqrt( np.tanh(k[nz]) / k[nz])
+        return mk
+    
 if __name__ == '__main__':
     amp_l   = [0.05,    0.075,  0.1,    0.125,  0.15]
     mean_l  = [0.0,     0.0,    0.0,    0.0,    0.0]
 
-    P = 10*2*np.pi
+    P = 2*2*np.pi
     N = 2**8
     dt = 5e-3
     T= 1
 
-    wpkdv = KdVLSM(P=P,N=N, dt=dt, T=T, amp_list=amp_l, mean_list=mean_l)
-    X = wpkdv.solve()
-    wpkdv._plot_(N//2 -1)
-
-    # x = np.linspace(0,P,N,endpoint=False)
-    # anim = animate_solution(x,wpkdv.eta_list[1])
-    # plt.show()
+    wp = WhithamLSM(P=P,N=N, dt=dt, T=T, amp_list=amp_l, mean_list=mean_l)
+    X = wp.solve()
+    wp._plot_(N//8)
