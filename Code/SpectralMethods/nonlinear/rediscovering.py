@@ -12,13 +12,11 @@ from nonlinear.spectralSolvers import *
 
 class WaveCollection(ABC):
     """Collection of different waves for LSM"""
-    def __init__(self, P, N, dt, T, amp_list, mean_list):
+    def __init__(self, P, N, M, amp_list, mean_list):
         self.P  = P
         self.N  = N
         self.dx = P/N
-        self.T  = T
-        self.dt = dt
-        self.w  = 2*np.pi*nf.fftfreq(int(T/dt)+1, dt)
+        self.M  = M
 
         self.k = 2*np.pi*nf.fftfreq(N, self.dx)
 
@@ -30,7 +28,7 @@ class WaveCollection(ABC):
         """Override with the travelling wave solver"""
 
     @abstractmethod
-    def wave_solver(self, u0):
+    def wave_solver(self, u0, dt , T):
         """Override with the PDE solver"""
 
     @abstractmethod
@@ -38,28 +36,37 @@ class WaveCollection(ABC):
         """Override with the methods symbols l and n"""
 
     def make_travelling_waves(self):
-        H0 = []
-
+        H0  = []
+        c   = []
         for amp, mean in zip(self.amp_list, self.mean_list):
             eta = self.wave_function(target_amp=amp, mean=mean)
             eta.solve_w_continuation()
             H0.append(nf.irfft(eta.phi_hat, n=self.N))
+            c.append(eta.c)
         self.H0 = H0
+        self.c = c
 
     def solve_forward(self):
-        eta_list = []
-        for eta in self.H0:
-            kdvs = self.wave_solver(eta)
+        eta_list    = []
+        w_list      = []
+        for eta,c in zip(self.H0, self.c):
+            Tc = self.P / c
+            dt = Tc/self.M
+            w_list.append(2*np.pi*nf.fftfreq(self.M, d=dt))
+            kdvs = self.wave_solver(eta, dt=dt, T=Tc)
             t,u  = kdvs.splitStep()
+            u = u[:self.M]
             eta_list.append(u) 
+
         self.eta_list = eta_list
+        self.w_list = w_list
 
     def LSM(self):
         eta_hat_list = []
         nl_hat_list  = []
         dHdt_hat_list= []
 
-        for eta in self.eta_list:
+        for eta,w in zip(self.eta_list, self.w_list):
             eta_hat = nf.fft(eta, axis=1) #fft_x
             # eta_pad = pad(eta, self.N)
 
@@ -74,11 +81,11 @@ class WaveCollection(ABC):
             # eta2_hat[:,:N2] = eta2_hat_pad[:,:N2]
             # eta2_hat[:,-(N2-1):] = eta2_hat_pad[:,-(N2-1):]
 
-            # dEtadt  = nf.ifft(
-            #     1j*self.w[:,None] * nf.fft(eta_hat, axis=0), axis=0
-            # ) # fft_t
+            dEtadt  = nf.ifft(
+                1j*w[:,None] * nf.fft(eta_hat, axis=0), axis=0
+            ) # fft_t
 
-            dEtadt = nf.fft(np.gradient(eta, self.dt, axis = 0, edge_order=2), axis=1)
+            # dEtadt = nf.fft(np.gradient(eta, self.dt, axis = 0, edge_order=2), axis=1)
 
             eta_hat_list.append(eta_hat)
             nl_hat_list.append(eta2_hat)
@@ -137,7 +144,7 @@ class WaveCollection(ABC):
         n = self.n[order]
         n[k==0] = np.nan
 
-        H_sorted = self.H[:,0,order]
+        H_sorted = self.H[:,self.M//4,order]
     
         axes[0,0].plot(k[a_neg:a_pos], ell[a_neg:a_pos].real, '.', label=r'estimated $\mathbb{Re}(\ell)$')
         axes[0,0].plot(k[a_neg:a_pos], ell_theory[a_neg:a_pos].real, '-', label='theory')
@@ -179,21 +186,21 @@ class WaveCollection(ABC):
 class KdVLSM(WaveCollection):
     def wave_function(self, target_amp, mean):
         return KdVSolver(P=self.P, target_amp= target_amp, mean=mean, N = self.N)
-    def wave_solver(self, u0):
-        return KdV(self.P, self.dt, self.T,u0=u0)
+    def wave_solver(self, u0, dt, T):
+        return KdV(self.P, dt=dt, T=T,u0=u0)
 
     def symbol(self,k):
         return 1-k**2 / 6
 
 class fKdVLSM(WaveCollection):
-    def __init__(self, P, N, dt, T, amp_list, mean_list, alpha):
+    def __init__(self, P, N, M, amp_list, mean_list, alpha):
         self.alpha = alpha
-        super().__init__(P, N, dt, T, amp_list, mean_list)
+        super().__init__(P, N, M, amp_list, mean_list)
 
     def wave_function(self, target_amp, mean):
         return fKdVSolver(P = self.P, target_amp=target_amp, mean=mean, N = self.N , alpha=self.alpha)
-    def wave_solver(self, u0):
-        return fKdV(P=P, dt = self.dt, T=self.T, alpha=self.alpha, u0=u0)
+    def wave_solver(self, u0,dt, T):
+        return fKdV(P=P, dt = dt, T=T, alpha=self.alpha, u0=u0)
 
     def symbol(self,k):
         if self.alpha < 0:
@@ -207,8 +214,8 @@ class fKdVLSM(WaveCollection):
 class WhithamLSM(WaveCollection):
     def wave_function(self, target_amp, mean):
         return WhithamSolver(P=self.P, target_amp= target_amp, mean=mean, N = self.N)
-    def wave_solver(self, u0):
-        return Whitham(self.P, self.dt, self.T,u0=u0)
+    def wave_solver(self, u0,dt, T):
+        return Whitham(self.P, T=T, dt= dt,u0=u0)
 
     def symbol(self,k):
         mk = np.ones_like(k)
@@ -220,11 +227,12 @@ if __name__ == '__main__':
     amp_l   = [0.05,    0.075,  0.1,    0.125,  0.15]
     mean_l  = [0.0,     0.0,    0.0,    0.0,    0.0]
 
-    P = 2*2*np.pi
+    P = 4*2*np.pi
     N = 2**8
-    dt = 5e-3
+    # dt = 5e-3
     T= 1
+    M = 120*T #fps
 
-    wp = WhithamLSM(P=P,N=N, dt=dt, T=T, amp_list=amp_l, mean_list=mean_l)
+    wp = KdVLSM(P=P,N=N, M=M, amp_list=amp_l, mean_list=mean_l)
     X = wp.solve()
     wp._plot_(N//8)
