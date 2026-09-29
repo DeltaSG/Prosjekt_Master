@@ -144,7 +144,7 @@ class WaveCollection(ABC):
         n = self.n[order]
         n[k==0] = np.nan
 
-        H_sorted = self.H[:,self.M//4,order]
+        H_sorted = self.H[:,0,order]
     
         axes[0,0].plot(k[a_neg:a_pos], ell[a_neg:a_pos].real, '.', label=r'estimated $\mathbb{Re}(\ell)$')
         axes[0,0].plot(k[a_neg:a_pos], ell_theory[a_neg:a_pos].real, '-', label='theory')
@@ -231,8 +231,8 @@ if __name__ == '__main__':
     N = 2**8
     # dt = 5e-3
     T= 1
-    M = 120*T #fps
+    M = 60*T #fps
 
     wp = KdVLSM(P=P,N=N, M=M, amp_list=amp_l, mean_list=mean_l)
     X = wp.solve()
-    wp._plot_(N//8)
+    wp._plot_(N//2-1)
