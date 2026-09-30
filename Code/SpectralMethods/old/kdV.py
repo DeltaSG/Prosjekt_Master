@@ -5,7 +5,7 @@
 # u_t + 6uu_x + u_xxx = 0
 
 import numpy as np
-from linear.help import *
+from Code.SpectralMethods.nonlinear.help import *
 from Code.SpectralMethods.old.spectralNewton import solve_with_continuation
 
 

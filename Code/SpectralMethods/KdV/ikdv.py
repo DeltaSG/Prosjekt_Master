@@ -6,8 +6,8 @@ import numpy as np
 import numpy.fft as nf
 import matplotlib.pyplot as plt 
 from KdV.soliton import Soliton
-from linear.help import make_x_array
-from linear.help import animate_solution
+from Code.SpectralMethods.nonlinear.help import make_x_array
+from Code.SpectralMethods.nonlinear.help import animate_solution
 
 class Packet():
     """Collection of waves for LSM"""

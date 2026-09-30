@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 from nonlinear.spectralSolvers import KdVSolver
 from nonlinear.solver import KdV
-from linear.help import *
+from Code.SpectralMethods.nonlinear.help import *
 
 # Creating a travelling wave:
 P = 10*2*np.pi

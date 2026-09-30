@@ -6,7 +6,7 @@ import numpy.fft as nf
 import matplotlib.pyplot as plt 
 from abc import ABC, abstractmethod
 
-from linear.help import *
+from nonlinear.help import *
 from nonlinear.solver import *
 from nonlinear.spectralSolvers import * 
 
@@ -73,19 +73,10 @@ class WaveCollection(ABC):
             mask = (np.abs(self.k) < (2/3)*np.max(np.abs(self.k)))
             eta_m = nf.ifft(eta_hat*mask, axis=1)
             eta2_hat = nf.fft(eta_m**2, axis=1)
-            # #Dealiasing by padding
-            # Npad = 3*self.N//2
-            # eta2_hat_pad =  nf.fft(eta_pad**2, axis= 1) * 2/3
-            # eta2_hat = np.zeros((int((self.T / self.dt) +1) , self.N), dtype=complex)
-            # N2 = self.N//2
-            # eta2_hat[:,:N2] = eta2_hat_pad[:,:N2]
-            # eta2_hat[:,-(N2-1):] = eta2_hat_pad[:,-(N2-1):]
 
             dEtadt  = nf.ifft(
                 1j*w[:,None] * nf.fft(eta_hat, axis=0), axis=0
             ) # fft_t
-
-            # dEtadt = nf.fft(np.gradient(eta, self.dt, axis = 0, edge_order=2), axis=1)
 
             eta_hat_list.append(eta_hat)
             nl_hat_list.append(eta2_hat)

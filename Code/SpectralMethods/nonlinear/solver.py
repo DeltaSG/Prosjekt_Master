@@ -7,7 +7,7 @@ import numpy.fft as nf
 import matplotlib.pyplot as plt
 from abc import ABC, abstractmethod
 
-from linear.help import *
+from nonlinear.help import *
 from nonlinear.spectralSolvers import *
 
 class Solver(ABC):
@@ -18,7 +18,7 @@ class Solver(ABC):
         elif u0_hat is not None:
              self.u0_hat = u0_hat
              self.u0 = nf.ifft(u0_hat)
-        else: raise ValueError("u0 or u0_hat must not be given.")
+        else: raise ValueError("u0 or u0_hat must be given.")
 
         self.N  = len(self.u0)
         self.N2 = self.N//2
@@ -130,23 +130,23 @@ class fKdV(Solver):
             nz = k != 0
             mk[nz] = - np.abs(k[nz])**self.alpha
             return mk     
-        return - np.abs(k)**self.alpha
+        return  - np.abs(k)**self.alpha
 
 
 if __name__ == '__main__':
      # Test of KdV solver
-     N = 2**6
-     P = 2*np.pi
+     N = 2**8
+     P = 60
 
      x = np.linspace(-P/2,P/2,N, endpoint=False)
      c = 4
      x0 = 0
-     def soliton(x,c, x0):
-             return (c/2) * 1/(np.cosh(np.sqrt(c)/2 *(x - x0))**2)
+     def gaussian(x):
+             return 0.1* np.exp(-x**2)
      
-     u0 = soliton(x,c,x0)
+     u0 = gaussian(x)
 
-     kdv = KdV(u0=u0, P=P,dt= 5e-4, T=1)
+     kdv = KdV(u0=u0, P=P,dt= 5e-3, T=5)
      t, u = kdv.splitStep()
 
      anim = animate_solution(x,u)

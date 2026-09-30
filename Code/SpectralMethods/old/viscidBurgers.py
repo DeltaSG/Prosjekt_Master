@@ -3,7 +3,7 @@
 # HSG
 
 import numpy as np
-from linear.help import *
+from Code.SpectralMethods.nonlinear.help import *
 
 
 

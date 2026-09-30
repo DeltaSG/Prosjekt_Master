@@ -6,7 +6,7 @@
 # Assuming the Fourier transformation of u exist for the initial condition u(0,*) = g(x)
 # In the spectral space we then get u(t,x)= g(x)*e^{L*t} for any L 
 import numpy as np
-from linear.help import *
+from Code.SpectralMethods.nonlinear.help import *
 
 class LinearSolver():
     """Solves linear PDEs with the Integrating Factor method"""
