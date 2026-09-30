@@ -114,7 +114,7 @@ class SpectralSolver(ABC):
 
     def solve_w_continuation(self, n_steps= 50):
         u = np.zeros(self.M+3)
-        u[-2] = 1 - (2*np.pi/self.P)**2 / 6 # inital guess, good for amp -> 0
+        u[-2] = self.mk[1]
 
         for amp in np.linspace(self.target_amp/n_steps, self.target_amp, n_steps):
             u[1] = self.N*amp/2 #updating target amp
@@ -194,7 +194,7 @@ def plot(u_list,names, N):
     plt.show()
 
 if __name__ == '__main__':
-    N = 2**6
+    N = 2**4
     amp = 0.05
     mean = 0.0
     P = 2*np.pi
