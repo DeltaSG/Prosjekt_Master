@@ -211,7 +211,7 @@ if __name__ == '__main__':
     fkdv.solve_w_continuation()
     # fkdv._plot_()
 
-    names = ['KdV' , 'Whitham' , r'fKdV $\alpha = 1$']
+    names = ['KdV' , 'Whitham' , fr'fKdV $\alpha = ${fkdv.alpha}']
     u_list = [kdv.u, whitham.u , fkdv.u]
 
     plot(u_list,names, N=N)
