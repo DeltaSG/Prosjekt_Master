@@ -130,8 +130,8 @@ class WaveCollection(ABC):
         fig, axes = plt.subplots(2,2,figsize = (10,4))
         if idx is None:
             idx = int(3*self.P/(4*np.pi) +1)
-        a_neg = N//2 - idx
-        a_pos = N//2 + idx +1
+        a_neg = self.N//2 - idx +1
+        a_pos = self.N//2 + idx
 
         order = np.argsort(self.k)
         k = self.k[order]
@@ -166,8 +166,9 @@ class WaveCollection(ABC):
         axes[0,1].grid()
 
         for i,amp in enumerate(self.amp_list):
-            axes[1,0].plot(k[a_neg:a_pos], H_sorted[i, a_neg:a_pos].real, label=f'amp={amp}')
-            axes[1,1].plot(k[a_neg:a_pos], H_sorted[i, a_neg:a_pos].imag, label=f'amp={amp}')
+            axes[1,0].semilogy(k[a_neg:a_pos], H_sorted[i, a_neg:a_pos].real, label=f'amp={amp}')
+            axes[1,0].semilogy(k[a_neg:a_pos], np.ones_like(H_sorted[i, a_neg:a_pos].real)*1e-14, label=f'Tolerance of Newton Solver')
+            axes[1,1].semilogy(k[a_neg:a_pos], H_sorted[i, a_neg:a_pos].imag, label=f'amp={amp}')
         axes[1,0].set_xlabel(r'$\xi$')
         axes[1,0].set_ylabel(r'Re$\widehat{\eta}$')
         axes[1,1].set_ylabel(r'Im$\widehat{\eta}$')
@@ -200,7 +201,7 @@ class fKdVLSM(WaveCollection):
     def wave_function(self, target_amp, mean):
         return fKdVSolver(P = self.P, target_amp=target_amp, mean=mean, N = self.N , alpha=self.alpha)
     def wave_solver(self, u0,dt, T):
-        return fKdV(P=P, dt = dt, T=T, alpha=self.alpha, u0=u0)
+        return fKdV(P=self.P, dt = dt, T=T, alpha=self.alpha, u0=u0)
 
     def symbol(self,k):
         if self.alpha < 0:
@@ -224,15 +225,15 @@ class WhithamLSM(WaveCollection):
         return mk
     
 if __name__ == '__main__':
-    amp_l   = [0.05,    0.075,  0.1,    0.125,  0.15]
-    mean_l  = [0.0,     0.0,    0.0,    0.0,    0.0]
+    amp_l   = [0.05,    0.075,  0.1,    0.125,  0.15, 0.2]
+    mean_l  = [0.0,     0.1,    0.05,    0.0,    0.0, 0.0]
 
-    P = 4*2*np.pi
-    N = 2**8
+    P = 2*np.pi
+    N = 2**5
     # dt = 5e-3
     T= 1
-    M = 60*T #fps
+    M = 1500*T #fps
 
     wp = KdVLSM(P=P,N=N, M=M, amp_list=amp_l, mean_list=mean_l)
     X = wp.solve()
-    wp._plot_(N//2-1)
+    wp._plot_(N//2)
