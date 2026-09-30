@@ -114,7 +114,7 @@ class SpectralSolver(ABC):
 
     def solve_w_continuation(self, n_steps= 50):
         u = np.zeros(self.M+3)
-        u[-2] = 1 - (2*np.pi/self.P)**2 / 6 # inital guess, good for amp -> 0
+        u[-2] = self.mk[1]
 
         for amp in np.linspace(self.target_amp/n_steps, self.target_amp, n_steps):
             u[1] = self.N*amp/2 #updating target amp
@@ -194,10 +194,10 @@ def plot(u_list,names, N):
     plt.show()
 
 if __name__ == '__main__':
-    N = 2**6
-    amp = 0.05
+    N = 2**3
+    amp = 0.05*2
     mean = 0.0
-    P = 2*np.pi
+    P = 2*2*np.pi
 
     kdv = KdVSolver(P=P, target_amp= amp, mean= mean , N = N)
     kdv.solve_w_continuation(n_steps=10)
@@ -211,7 +211,7 @@ if __name__ == '__main__':
     fkdv.solve_w_continuation()
     # fkdv._plot_()
 
-    names = ['KdV' , 'Whitham' , r'fKdV $\alpha = 1$']
+    names = ['KdV' , 'Whitham' , fr'fKdV $\alpha = $ {fkdv.alpha}']
     u_list = [kdv.u, whitham.u , fkdv.u]
 
     plot(u_list,names, N=N)

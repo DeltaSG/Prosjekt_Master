@@ -220,11 +220,14 @@ if __name__ == '__main__':
     amp_l   = [0.05,    0.075,  0.1,    0.125,  0.15]
     mean_l  = [0.0,     0.0,    0.0,    0.0,    0.0]
 
-    P = 2*2*np.pi
-    N = 2**8
+    P = 2*np.pi
+    N = 2**4
     dt = 5e-3
     T= 1
 
     wp = WhithamLSM(P=P,N=N, dt=dt, T=T, amp_list=amp_l, mean_list=mean_l)
+    # wp = fKdVLSM(P=P,N=N, dt=dt, T=T, amp_list=amp_l, mean_list=mean_l, alpha=2)
+    # wp = KdVLSM(P=P,N=N, dt=dt, T=T, amp_list=amp_l, mean_list=mean_l)
+
     X = wp.solve()
-    wp._plot_(N//8)
+    wp._plot_(N//2-1)
