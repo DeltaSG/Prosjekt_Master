@@ -130,7 +130,11 @@ def hamiltonian(u,mk,dx):
 
     return H2 + H3
 
-
+def print_list(name:str, lst:list):
+    print(f"{name}: ", end = "")
+    for i in lst:
+        print(f"{i:.3f}", end = " ")
+    print("")
 
 def conservationInfo(unit, name:str = "Mass"):
     print(5*"-","Conservation of ", name , 5*"-" )

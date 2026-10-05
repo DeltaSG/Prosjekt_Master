@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from abc import ABC, abstractmethod
 
 from linear.help import *
-from nonlinear.solver import *
+from Code.SpectralMethods.nonlinear.solvers import *
 from nonlinear.spectralSolvers import * 
 
 class WaveCollection(ABC):

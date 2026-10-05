@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from nonlinear.spectralSolvers import WhithamSolver
-from nonlinear.solver import Whitham
+from Code.SpectralMethods.nonlinear.solvers import Whitham
 from linear.help import *
 
 # Creating a travelling wave:

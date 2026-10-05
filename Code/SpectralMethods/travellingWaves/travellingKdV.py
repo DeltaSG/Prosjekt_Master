@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from nonlinear.spectralSolvers import KdVSolver
-from nonlinear.solver import KdV
+from Code.SpectralMethods.nonlinear.solvers import KdV
 from linear.help import *
 
 # Creating a travelling wave:
