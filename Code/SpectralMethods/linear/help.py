@@ -4,7 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 from matplotlib.widgets import Slider
-
+from IPython.display import HTML
+import pandas as pd
 
 def make_x_array(N:int , L:float , symmetric:bool) -> np.ndarray:
     x = np.linspace(
@@ -110,6 +111,28 @@ def animate_solution(x, u, interval = 40):
     # plt.close(fig)
     return anim
 
+
+
+
+def animate_solution_nb(x, u, stride=10, interval=40):
+    """Plays the solution u (n_frames, N) over x once, in a notebook."""
+    frames = range(0, u.shape[0], stride)
+    pad = 0.05 * (u.max() - u.min() + 1e-12)
+
+    fig, ax = plt.subplots()
+    ax.set_ylim(u.min() - pad, u.max() + pad)
+    ax.grid(True)
+    line, = ax.plot(x, u[0], lw=2)
+
+    def update(n):
+        line.set_ydata(u[n])
+        ax.set_title(f"frame {n}")
+        return line,
+
+    anim = FuncAnimation(fig, update, frames=frames, interval=interval, repeat=False)
+    plt.close(fig)  # stops the static figure from showing up as well
+    return HTML(anim.to_jshtml(default_mode="once"))
+
 def mass(u,dx):
     U = np.asarray(u)
     return dx*np.sum(U, axis=-1)
@@ -130,11 +153,22 @@ def hamiltonian(u,mk,dx):
 
     return H2 + H3
 
-def print_list(name:str, lst:list):
-    print(f"{name}: ", end = "")
-    for i in lst:
-        print(f"{i:.3f}", end = " ")
-    print("")
+
+def fit_table(ell, n, part="imag"):
+    """DataFrame of polyfit coefficients, columns = powers (highest first).
+    ell, n: coefficient arrays from np.polyfit. part: 'imag', 'real' or 'both'."""
+    deg = len(ell) - 1
+    cols = [f"ξ^{p}" for p in range(deg, -1, -1)]
+
+    if part == "both":
+        return pd.DataFrame({"ell": ell, "n": n}, index=cols).T
+    get = np.imag if part == "imag" else np.real
+    return pd.DataFrame([get(ell), get(n)], index=["ell", "n"], columns=cols)
+
+def fineprint(ell, n, part="imag"):
+    deg = len(ell) - 1
+    print(f"Fitting polynomial of degree {deg} to the symbol data...")
+    print(fit_table(ell, n, part).to_string(float_format=lambda v: f"{v:.3f}"))
 
 def conservationInfo(unit, name:str = "Mass"):
     print(5*"-","Conservation of ", name , 5*"-" )

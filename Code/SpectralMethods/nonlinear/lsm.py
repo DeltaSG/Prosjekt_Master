@@ -8,6 +8,7 @@ import numpy.fft as nf
 import matplotlib.pyplot as plt
 from abc import ABC, abstractmethod
 from linear.help import *
+import pandas as pd
 
 class LSM():
     """A class that takes in a tensor of data and uses the least squares method to estimate the symbols"""
@@ -78,11 +79,39 @@ class LSM():
             ell = ell[idx_range[0]:idx_range[1]]
             n = n[idx_range[0]:idx_range[1]]
 
-        self.ell_fit = np.polyfit(k, ell, deg=3)
-        self.n_fit   = np.polyfit(k, n, deg=3)
+        self.ell_fit = np.polyfit(k, ell, deg=deg)
+        self.n_fit   = np.polyfit(k, n, deg=deg)
 
         return self.ell_fit, self.n_fit 
 
+
+    def plot_symbol_fit(self, k, idx_range = None, ell_t = lambda k: k**3/6 - k, n_t = lambda k: -0.5*k):
+        order = np.argsort(k)
+        k = k[order]
+        ell = self.ell[order]
+        n = self.n[order]
+        if idx_range is not None:
+            k = k[idx_range[0]:idx_range[1]]
+            ell = ell[idx_range[0]:idx_range[1]]
+            n = n[idx_range[0]:idx_range[1]]
+
+        ell_theory = ell_t(k)
+        n_theory   = n_t(k)
+
+        fig, ax = plt.subplots(1,2)
+        ax[0].plot(k, ell.imag, label = "ell", marker='o', linestyle='-', markersize=3)
+        ax[0].plot(k, ell_theory, label = "theory", marker='x', linestyle=':', markersize=3)
+        ax[0].legend()
+        ax[0].grid(True)
+    
+        ax[1].plot(k, n.imag, label = "n", marker='o', linestyle='-', markersize=3)
+        ax[1].plot(k, n_theory, label = "theory", marker='x', linestyle=':', markersize=3)
+        ax[1].legend()
+        ax[1].grid(True)
+    
+        plt.show()
+
+        
 if __name__ == "__main__":
     from nonlinear.spectralSolvers import KdVSolver
     from nonlinear.solvers import KdV
@@ -93,16 +122,16 @@ if __name__ == "__main__":
     w2 = KdVSolver(P = 2*np.pi, target_amp = 0.25, N = 2**8, mean = 0.0)
     w2.solve_w_continuation()
 
-    # kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 30, u0 = np.fft.irfft(w1.u[:-2] + w2.u[:-2], n = 2**8), save_every=1)
-    # kdv1.splitStep()
-
-    kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2], n = 2**8), save_every=1)
+    kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 30, u0 = np.fft.irfft(w1.u[:-2] + w2.u[:-2], n = 2**8), save_every=1)
     kdv1.splitStep()
-    kdv2 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w2.u[:-2], n = 2**8), save_every=1)
-    kdv2.splitStep()
 
-    lsm = LSM([kdv1.u, kdv2.u], kdv1.dt)
-    # lsm = LSM([kdv1.u], kdv1.dt)
+    # kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2], n = 2**8), save_every=1)
+    # kdv1.splitStep()
+    # kdv2 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w2.u[:-2], n = 2**8), save_every=1)
+    # kdv2.splitStep()
+
+    # lsm = LSM([kdv1.u, kdv2.u], kdv1.dt)
+    lsm = LSM([kdv1.u], kdv1.dt)
     X = lsm.lsm()
 
     k = np.fft.fftfreq(kdv1.N, d = kdv1.P/kdv1.N)*2*np.pi
@@ -119,17 +148,11 @@ if __name__ == "__main__":
     half = kdv1.N//2
     k_o = k[order]
     X_0 = X[order,0]
+    X_1 = X[order,1]
 
 
     ii = idx
     idx = half + ii
     idx_neg = half - ii + 1
     
-    mk = k_o**3 / 6 - k_o
-
-    plt.plot(k_o[idx_neg:idx], X_0[idx_neg:idx].imag, label = "ell", marker='o', linestyle='-', markersize=3)
-    plt.plot(k_o[idx_neg:idx], mk[idx_neg:idx], label = "theory", marker='x', linestyle=':', markersize=3)
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-
+    lsm.plot_symbol_fit(k, idx_range = (idx_neg, idx), ell_t = lambda k: k**3/6 - k, n_t = lambda k: -0.5*k)
