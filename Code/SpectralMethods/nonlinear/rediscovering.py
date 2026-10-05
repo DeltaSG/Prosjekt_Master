@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from abc import ABC, abstractmethod
 
 from linear.help import *
-from Code.SpectralMethods.nonlinear.solvers import *
+from nonlinear.solvers import *
 from nonlinear.spectralSolvers import * 
 
 class WaveCollection(ABC):
@@ -180,9 +180,21 @@ class WaveCollection(ABC):
         plt.tight_layout()
         plt.show()
 
-    def lsf(self):
-        """Least squares fitting"""
-        pass
+    def fit_symbol(self, idx_range = None, deg = 3):
+        """Fit the symbols to a polynomial in k"""
+        order = np.argsort(self.k)
+        k = self.k[order]
+        ell = self.ell[order]
+        n = self.n[order]
+        if idx_range is not None:
+            k = k[idx_range[0]:idx_range[1]]
+            ell = ell[idx_range[0]:idx_range[1]]
+            n = n[idx_range[0]:idx_range[1]]
+
+        self.ell_fit = np.polyfit(k, ell, deg=3)
+        self.n_fit   = np.polyfit(k, n, deg=3)
+
+        return self.ell_fit, self.n_fit
  
 class KdVLSM(WaveCollection):
     def wave_function(self, target_amp, mean):
@@ -238,7 +250,13 @@ if __name__ == '__main__':
     wp = KdVLSM(P=P,N=N, dt=dt, T=T, amp_list=amp_l, mean_list=mean_l)
 
     X = wp.solve()
-    wp._plot_(N//2-1)
+    wp.fit_symbol(idx_range = (N//2-9, N//2+9), deg = 3)
+
+
+    print('xi^p:  3,     2,     1,     0')
+    print_list("ell ", wp.ell_fit.real)
+    print_list("n   ", wp.n_fit.real)
+    # wp._plot_(N//2-1)
     # for t in range(0,int(T/dt), 40):
     #     for i, amp in enumerate(amp_l):
 
