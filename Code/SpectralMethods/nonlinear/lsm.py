@@ -139,9 +139,7 @@ if __name__ == "__main__":
     idx_range = (kdv1.N//2 - idx +1, kdv1.N//2 + idx)
 
     ell , n= lsm.fit_symbol(k, idx_range = idx_range, deg = 5)
-    print('xi^p:  3,     2,     1,     0')
-    fit_table("ell", ell.imag)
-    fit_table("n", n.imag)
+    print(fit_table(ell, n, part="imag"))
 
 
     order = np.argsort(k)
