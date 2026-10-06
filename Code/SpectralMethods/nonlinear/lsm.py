@@ -122,7 +122,7 @@ if __name__ == "__main__":
     w2 = KdVSolver(P = 2*np.pi, target_amp = 0.25, N = 2**8, mean = 0.0)
     w2.solve_w_continuation()
 
-    kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 30, u0 = np.fft.irfft(w1.u[:-2] + w2.u[:-2], n = 2**8), save_every=1)
+    kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2] + w2.u[:-2], n = 2**8), save_every=1)
     kdv1.splitStep()
 
     # kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2], n = 2**8), save_every=1)
@@ -139,7 +139,7 @@ if __name__ == "__main__":
     idx_range = (kdv1.N//2 - idx +1, kdv1.N//2 + idx)
 
     ell , n= lsm.fit_symbol(k, idx_range = idx_range, deg = 5)
-    print(fit_table(ell, n, part="imag"))
+    # print(fit_table(ell, n, part="imag"))
 
 
     order = np.argsort(k)
@@ -154,3 +154,16 @@ if __name__ == "__main__":
     idx_neg = half - ii + 1
     
     # lsm.plot_symbol_fit(k, idx_range = (idx_neg, idx), ell_t = lambda k: k**3/6 - k, n_t = lambda k: -0.5*k)
+
+
+    eta = lsm.eta_list[0]
+    eh  = nf.fft(eta, axis=1)
+    k   = np.fft.fftfreq(eta.shape[1], d=kdv1.P/eta.shape[1])*2*np.pi
+    mask = np.abs(k) < (2/3)*np.max(np.abs(k))
+
+    H2_full = nf.fft(eta**2, axis=1)
+    H2_mask = nf.fft(nf.ifft(eh*mask, axis=1)**2, axis=1)
+
+    win = np.abs(k) < 9
+    rel = np.abs(H2_full - H2_mask)[:, win] / np.abs(H2_mask)[:, win]
+    print(rel.max(), np.median(rel))
