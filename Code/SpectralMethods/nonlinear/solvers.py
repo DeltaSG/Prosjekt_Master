@@ -41,13 +41,7 @@ class Solver(ABC):
         """Return the Fourier symbol m(k) as an array"""
 
     def nonlinear_rhs(self, u_hat_in):
-        u_hat_pad   = pad(u_hat_in, self.N)
-        u_pad       = nf.ifft(u_hat_pad)*3/2
-        nl_hat_pad  = 1j*self.k_pad*nf.fft(u_pad**2) * 2/3
-
-        nl_hat = np.zeros(self.N, dtype=complex)
-        nl_hat[:self.N2] = nl_hat_pad[:self.N2]
-        nl_hat[-(self.N2-1):] = nl_hat_pad[-(self.N2-1):]
+        nl_hat = nf.fft(nf.ifft(u_hat_in)**2)
         rhs = -nl_hat/2
         return rhs
 

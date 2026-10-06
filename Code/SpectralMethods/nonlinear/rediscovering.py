@@ -62,23 +62,7 @@ class WaveCollection(ABC):
 
         for eta in self.eta_list:
             eta_hat = nf.fft(eta, axis=1) #fft_x
-            # eta_pad = pad(eta, self.N)
-
-            mask = (np.abs(self.k) < (2/3)*np.max(np.abs(self.k)))
-            eta_m = nf.ifft(eta_hat*mask, axis=1)
-            eta2_hat = nf.fft(eta_m**2, axis=1)
-            # #Dealiasing by padding
-            # Npad = 3*self.N//2
-            # eta2_hat_pad =  nf.fft(eta_pad**2, axis= 1) * 2/3
-            # eta2_hat = np.zeros((int((self.T / self.dt) +1) , self.N), dtype=complex)
-            # N2 = self.N//2
-            # eta2_hat[:,:N2] = eta2_hat_pad[:,:N2]
-            # eta2_hat[:,-(N2-1):] = eta2_hat_pad[:,-(N2-1):]
-
-            # dEtadt  = nf.ifft(
-            #     1j*self.w[:,None] * nf.fft(eta_hat, axis=0), axis=0
-            # ) # fft_t
-
+            eta2_hat = nf.fft(eta**2, axis=1)
             dEtadt = nf.fft(np.gradient(eta, self.dt, axis = 0, edge_order=2), axis=1)
 
             eta_hat_list.append(eta_hat)
@@ -254,9 +238,9 @@ if __name__ == '__main__':
 
 
     print('xi^p:  3,     2,     1,     0')
-    print_list("ell ", wp.ell_fit.real)
-    print_list("n   ", wp.n_fit.real)
-    # wp._plot_(N//2-1)
+    fit_table("ell ", wp.ell_fit.real)
+    fit_table("n   ", wp.n_fit.real)
+    wp._plot_(15)
     # for t in range(0,int(T/dt), 40):
     #     for i, amp in enumerate(amp_l):
 

@@ -140,8 +140,8 @@ if __name__ == "__main__":
 
     ell , n= lsm.fit_symbol(k, idx_range = idx_range, deg = 5)
     print('xi^p:  3,     2,     1,     0')
-    print_list("ell", ell.imag)
-    print_list("n", n.imag)
+    fit_table("ell", ell.imag)
+    fit_table("n", n.imag)
 
 
     order = np.argsort(k)
