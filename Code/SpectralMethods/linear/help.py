@@ -154,6 +154,15 @@ def hamiltonian(u,mk,dx):
     return H2 + H3
 
 
+
+def conservationInfo(unit, name:str = "Mass"):
+    print(5*"-","Conservation of ", name , 5*"-" )
+    print(f"Initial {name}: {unit[0].real:.3f}")
+    print(f"Final {name}: {unit[-1].real:.3f}")
+    print(f"Maximum error: {(np.max(np.abs(unit -unit[0]).real)):.3f}")
+    print(f"Relative error: {((np.max(np.abs(unit -unit[0]))/np.abs(unit[0]).real)):.3f}")
+    print(30*"-")
+
 def fit_table(ell, n, part="imag"):
     """DataFrame of polyfit coefficients, columns = powers (highest first).
     ell, n: coefficient arrays from np.polyfit. part: 'imag', 'real' or 'both'."""
@@ -170,15 +179,20 @@ def fineprint(ell, n, part="imag"):
     print(f"Fitting polynomial of degree {deg} to the symbol data...")
     print(fit_table(ell, n, part).to_string(float_format=lambda v: f"{v:.3f}"))
 
-def conservationInfo(unit, name:str = "Mass"):
-    print(5*"-","Conservation of ", name , 5*"-" )
-    print(f"Initial {name}: {unit[0].real:.3f}")
-    print(f"Final {name}: {unit[-1].real:.3f}")
-    print(f"Maximum error: {(np.max(np.abs(unit -unit[0]).real)):.3f}")
-    print(f"Relative error: {((np.max(np.abs(unit -unit[0]))/np.abs(unit[0]).real)):.3f}")
-    print(30*"-")
 
-    
+def relErr(ell, n, ell_t, n_t, k):
+    """Relative error of the fitted polynomial to the theoretical symbol."""
+    ell_theory = ell_t(k)
+    n_theory   = n_t(k)
+    try:
+        rel_err_ell = np.abs(ell - ell_theory)/np.abs(ell_theory)
+        rel_err_n   = np.abs(n - n_theory)/np.abs(n_theory)
+
+    except ZeroDivisionError:
+        rel_err_ell = np.abs(ell - ell_theory)
+        rel_err_n   = np.abs(n - n_theory)
+
+    return rel_err_ell, rel_err_n
 
 if __name__ == '__main__':
     N = 2**5

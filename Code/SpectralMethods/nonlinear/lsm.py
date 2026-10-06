@@ -153,17 +153,7 @@ if __name__ == "__main__":
     idx = half + ii
     idx_neg = half - ii + 1
     
-    # lsm.plot_symbol_fit(k, idx_range = (idx_neg, idx), ell_t = lambda k: k**3/6 - k, n_t = lambda k: -0.5*k)
+    lsm.plot_symbol_fit(k, idx_range = (idx_neg, idx), ell_t = lambda k: k**3/6 - k, n_t = lambda k: -0.5*k)
 
 
-    eta = lsm.eta_list[0]
-    eh  = nf.fft(eta, axis=1)
-    k   = np.fft.fftfreq(eta.shape[1], d=kdv1.P/eta.shape[1])*2*np.pi
-    mask = np.abs(k) < (2/3)*np.max(np.abs(k))
-
-    H2_full = nf.fft(eta**2, axis=1)
-    H2_mask = nf.fft(nf.ifft(eh*mask, axis=1)**2, axis=1)
-
-    win = np.abs(k) < 9
-    rel = np.abs(H2_full - H2_mask)[:, win] / np.abs(H2_mask)[:, win]
-    print(rel.max(), np.median(rel))
+   

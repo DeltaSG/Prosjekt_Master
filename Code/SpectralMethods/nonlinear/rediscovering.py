@@ -253,7 +253,7 @@ if __name__ == '__main__':
 
     X = wp.solve()
     idx = 10
-    wp.fit_symbol(idx_range = (N//2-idx, N//2+idx), deg = 5)
+    wp.fit_symbol(idx_range = (N//2-idx+1, N//2+idx), deg = 5)
 
 
     print(fit_table(wp.ell_fit, wp.n_fit, part="real"))
