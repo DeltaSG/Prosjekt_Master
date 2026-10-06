@@ -175,8 +175,8 @@ class WaveCollection(ABC):
             ell = ell[idx_range[0]:idx_range[1]]
             n = n[idx_range[0]:idx_range[1]]
 
-        self.ell_fit = np.polyfit(k, ell, deg=3)
-        self.n_fit   = np.polyfit(k, n, deg=3)
+        self.ell_fit = np.polyfit(k, ell, deg=deg)
+        self.n_fit   = np.polyfit(k, n, deg=deg)
 
         return self.ell_fit, self.n_fit
  
@@ -232,15 +232,13 @@ if __name__ == '__main__':
     # wp = WhithamLSM(P=P,N=N, dt=dt, T=T, amp_list=amp_l, mean_list=mean_l)
     # wp = fKdVLSM(P=P,N=N, dt=dt, T=T, amp_list=amp_l, mean_list=mean_l, alpha=2)
     wp = KdVLSM(P=P,N=N, dt=dt, T=T, amp_list=amp_l, mean_list=mean_l)
-
+    idx = 9
     X = wp.solve()
-    wp.fit_symbol(idx_range = (N//2-9, N//2+9), deg = 3)
+    wp.fit_symbol(idx_range = (N//2-idx, N//2+idx), deg = 5)
 
 
-    print('xi^p:  3,     2,     1,     0')
-    fit_table("ell ", wp.ell_fit.real)
-    fit_table("n   ", wp.n_fit.real)
-    wp._plot_(15)
+    print(fit_table(wp.ell_fit, wp.n_fit, part="real"))
+    wp._plot_(idx)
     # for t in range(0,int(T/dt), 40):
     #     for i, amp in enumerate(amp_l):
 
