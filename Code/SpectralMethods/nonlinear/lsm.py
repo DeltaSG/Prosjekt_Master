@@ -122,7 +122,7 @@ if __name__ == "__main__":
     w2 = KdVSolver(P = 2*np.pi, target_amp = 0.25, N = 2**8, mean = 0.0)
     w2.solve_w_continuation()
 
-    kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 30, u0 = np.fft.irfft(w1.u[:-2] + w2.u[:-2], n = 2**8), save_every=1)
+    kdv1 = KdV(P = 2*np.pi, dt = 5e-5, T = 30, u0 = np.fft.irfft(w1.u[:-2] + w2.u[:-2], n = 2**8), save_every=1)
     kdv1.splitStep()
 
     # kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2], n = 2**8), save_every=1)
