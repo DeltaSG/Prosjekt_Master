@@ -115,20 +115,20 @@ if __name__ == "__main__":
     w2 = KdVSolver(P = 2*np.pi, target_amp = 0.25, N = 2**8, mean = 0.0)
     w2.solve_w_continuation()
 
-    kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2] + w2.u[:-2], n = 2**8), save_every=5)
-    kdv1.splitStep()
-
-    # kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2], n = 2**8), save_every=1)
+    # kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2] + w2.u[:-2], n = 2**8), save_every=5)
     # kdv1.splitStep()
-    # kdv2 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w2.u[:-2], n = 2**8), save_every=1)
-    # kdv2.splitStep()
 
-    # lsm = LSM([kdv1.u, kdv2.u], kdv1.dt)
-    lsm = LSM([kdv1.u], kdv1.dt*kdv1.save_every)
+    kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2], n = 2**8), save_every=1)
+    kdv1.splitStep()
+    kdv2 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w2.u[:-2], n = 2**8), save_every=1)
+    kdv2.splitStep()
+
+    lsm = LSM([kdv1.u, kdv2.u], kdv1.dt)
+    # lsm = LSM([kdv1.u], kdv1.dt*kdv1.save_every)
     X = lsm.lsm()
 
     k = np.fft.fftfreq(kdv1.N, d = kdv1.P/kdv1.N)*2*np.pi
-    idx = 9
+    idx = kdv1.N//2 - 1
     idx_range = (kdv1.N//2 - idx +1, kdv1.N//2 + idx)
 
     ell , n= lsm.fit_symbol(k, idx_range = idx_range, deg = 5)
