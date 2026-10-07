@@ -35,6 +35,8 @@ class LSM():
             nl_hat_list.append(nl_hat)
             dHdt_hat_list.append(dHdt_hat)
 
+        self.eta_hat = eta_hat_list
+        self.nl_hat = nl_hat_list
         H = np.stack(eta_hat_list, axis=0)
         H2 = np.stack(nl_hat_list, axis=0)
         dHdt = np.stack(dHdt_hat_list, axis=0)
@@ -51,6 +53,18 @@ class LSM():
         A = np.stack(
             [Hr, H2r] , axis= 1
         )
+        # Expanding the pseudo-inverse to look at the condition number of the matrix
+        print(A.shape[0], len(self.eta_list[0][0]))
+        self.cond = np.empty(A.shape[0])
+        self.sigma_min = np.empty(A.shape[0])
+        self.sigma_max = np.empty(A.shape[0])
+
+        for f in range(A.shape[0]):
+            s = np.linalg.svd(A[f], compute_uv=False)
+            self.cond[f] = s[0]/s[-1]
+            self.sigma_min[f] = s[-1]
+            self.sigma_max[f] = s[0]
+
 
         A_pinv = np.linalg.pinv(A)
         X = np.einsum('fs,fsc->fc', dHdtr, A_pinv)
@@ -64,16 +78,16 @@ class LSM():
     def fit_symbol(self, k, idx_range = None, deg = 3):
         """Fit the symbols to a polynomial in k"""
         order = np.argsort(k)
-        k = k[order]
+        ko = k[order]
         ell = self.ell[order]
         n = self.n[order]
         if idx_range is not None:
-            k = k[idx_range[0]:idx_range[1]]
+            ko = ko[idx_range[0]:idx_range[1]]
             ell = ell[idx_range[0]:idx_range[1]]
             n = n[idx_range[0]:idx_range[1]]
 
-        self.ell_fit = np.polyfit(k, ell, deg=deg)
-        self.n_fit   = np.polyfit(k, n, deg=deg)
+        self.ell_fit = np.polyfit(ko, ell, deg=deg)
+        self.n_fit   = np.polyfit(ko, n, deg=deg)
 
         return self.ell_fit, self.n_fit 
 
@@ -115,20 +129,20 @@ if __name__ == "__main__":
     w2 = KdVSolver(P = 2*np.pi, target_amp = 0.25, N = 2**8, mean = 0.0)
     w2.solve_w_continuation()
 
-    # kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2] + w2.u[:-2], n = 2**8), save_every=5)
-    # kdv1.splitStep()
-
-    kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2], n = 2**8), save_every=1)
+    kdv1 = KdV(P = 2*np.pi, dt = 1e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2] + w2.u[:-2], n = 2**8), save_every=5)
     kdv1.splitStep()
-    kdv2 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w2.u[:-2], n = 2**8), save_every=1)
-    kdv2.splitStep()
 
-    lsm = LSM([kdv1.u, kdv2.u], kdv1.dt)
-    # lsm = LSM([kdv1.u], kdv1.dt*kdv1.save_every)
+    # kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2], n = 2**8), save_every=1)
+    # kdv1.splitStep()
+    # kdv2 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w2.u[:-2], n = 2**8), save_every=1)
+    # kdv2.splitStep()
+
+    # lsm = LSM([kdv1.u, kdv2.u], kdv1.dt)
+    lsm = LSM([kdv1.u], kdv1.dt*kdv1.save_every)
     X = lsm.lsm()
 
     k = np.fft.fftfreq(kdv1.N, d = kdv1.P/kdv1.N)*2*np.pi
-    idx = kdv1.N//2 - 1
+    idx = 15 #kdv1.N//2- 1
     idx_range = (kdv1.N//2 - idx +1, kdv1.N//2 + idx)
 
     ell , n= lsm.fit_symbol(k, idx_range = idx_range, deg = 5)
@@ -146,4 +160,30 @@ if __name__ == "__main__":
     idx = half + ii
     idx_neg = half - ii + 1
     
-    lsm.plot_symbol_fit(k, idx_range = (idx_neg, idx), ell_t = lambda k: k**3/6 - k, n_t = lambda k: -0.5*k)
+    # lsm.plot_symbol_fit(k, idx_range = (idx_neg, idx), ell_t = lambda k: k**3/6 - k, n_t = lambda k: -0.5*k)
+    # plt.semilogy(k, lsm.cond, 'x', color = 'r')
+    # plt.axvline(10, linestyle = '--')
+    # plt.axvline(-10, linestyle = '--')
+    # plt.grid(True)
+    # plt.xlabel("k")
+    # plt.ylabel(r"$\kappa(A_k)$")
+    # plt.show()
+
+    fig, ax = plt.subplots(1,2)
+
+    ax[0].semilogy(k, lsm.sigma_max, 'x', label=r'$\sigma_{\max}$')
+    ax[0].semilogy(k, lsm.sigma_min, 'x', label=r'$\sigma_{\min}$')
+
+    ax[0].set_xlabel(r'$k$')
+    ax[0].set_ylabel('singular value')
+    ax[0].legend()
+    ax[0].grid(True)
+
+    for eta in lsm.eta_hat:
+        ax[1].semilogy(k_o[idx_neg: idx],np.abs(eta[0,order][idx_neg: idx]), 'o-')
+        ax[1].set_xlabel(r'$k$')
+        ax[1].set_ylabel(r'$\hat{\eta}$')
+        # ax[1].legend()
+        ax[1].grid(True)
+
+    plt.show()

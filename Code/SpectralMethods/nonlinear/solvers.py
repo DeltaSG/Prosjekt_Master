@@ -42,7 +42,7 @@ class Solver(ABC):
 
     def nonlinear_rhs(self, u_hat_in):
         nl_hat = nf.fft(nf.ifft(u_hat_in)**2)
-        rhs = -nl_hat/2
+        rhs = -1j*self.k*nl_hat/2
         return rhs
 
     def rk4_step(self, u_hat_in, h):
