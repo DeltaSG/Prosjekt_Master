@@ -18,11 +18,9 @@ class Solver(ABC):
         elif u0_hat is not None:
              self.u0_hat = u0_hat
              self.u0 = nf.ifft(u0_hat)
-        else: raise ValueError("u0 or u0_hat must not be given.")
+        else: raise ValueError("u0 or u0_hat must be given.")
 
         self.N  = len(self.u0)
-        self.N2 = self.N//2
-        self.Npad = 3*self.N//2
         self.P  = P
         self.dx = P/self.N
 
@@ -33,16 +31,13 @@ class Solver(ABC):
         self.T = T
         self.save_every = save_every
 
-        # Dealiasing by padding
-        self.k_pad = 2*np.pi*nf.fftfreq(self.Npad, d = self.P/self.Npad)
-
     @abstractmethod
     def dispersion(self,k):
         """Return the Fourier symbol m(k) as an array"""
 
     def nonlinear_rhs(self, u_hat_in):
         nl_hat = nf.fft(nf.ifft(u_hat_in)**2)
-        rhs = -nl_hat/2
+        rhs = -(1j*self.k)*nl_hat/2
         return rhs
 
     def rk4_step(self, u_hat_in, h):
