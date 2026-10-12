@@ -28,6 +28,7 @@ class LSM():
 
         for eta in self.eta_list:
             eta_hat = nf.fft(eta, axis=1)
+            # add (current) highest non-zero k test
             nl_hat = nf.fft(eta**2, axis=1)
             dHdt_hat= nf.fft(np.gradient(eta, self.dt, axis=0, edge_order=2), axis=1)
 
@@ -35,6 +36,7 @@ class LSM():
             nl_hat_list.append(nl_hat)
             dHdt_hat_list.append(dHdt_hat)
 
+        
         H = np.stack(eta_hat_list, axis=0)
         H2 = np.stack(nl_hat_list, axis=0)
         dHdt = np.stack(dHdt_hat_list, axis=0)
@@ -43,7 +45,7 @@ class LSM():
             """Move frequency to axis 0, and flatten (soltion, time) into one sample axis"""
             arr = np.moveaxis(arr, -1,0)
             return arr.reshape(arr.shape[0], -1)
-
+        # crop lists in k, we only want the modes that are significantly non-zero
         Hr      = to_freq_first(H)
         H2r     = to_freq_first(H2)
         dHdtr   = to_freq_first(dHdt)
