@@ -209,12 +209,18 @@ if __name__ == '__main__':
     u_sol = np.zeros(N//2+3)
     u_sol[:-2] = nf.rfft(sol)
 
-    # plt.plot(x,sol)
+    k = 2*np.pi*nf.rfftfreq(n=N, d = P/N)
+
+    # plt.plot(k, u_sol)
     # plt.show()
 
     kdv = KdVSolver(P=P, target_amp= amp, mean= mean , N = N)
     kdv.solve_w_continuation(n_steps=10)
+    # plt.plot(k, kdv.phi_hat, 'o-')
+    # plt.show()
     # wkdv._plot_()
+
+
 
     whitham = WhithamSolver(P, amp, mean, N)
     whitham.solve_w_continuation()

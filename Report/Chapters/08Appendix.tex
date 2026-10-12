@@ -1,99 +1,38 @@
+\chapter{A - The work flow}
+In this chapter i will recount the work i have done and the steps taken to achieve the final goal.
+\section{The travelling waves}
+Before one can start solving travelling KdV waves in time one needs to build travelling KdV waves. 
+For me this started with looking at the Airy equation and implementing the $sech^2$ wave, both as a univariale, and a bivariate function. 
+From this i worked on methods of solving them forward in time, and comparing them to their analytic counterparts, however that is a topic for the next chapter.
+The form of the Airy functions intreged me and i tried to no avail to create my own, the method was unstable numerically and i consiged and used the prebuilt functions from scipy.
+From this point on, i started looking at newton solvers for the travelling waves. 
+
+    \subsection{Naive Newton}
+    Wether the name has any theoretical annotations i do not know, the method i created however was quite naive in its implemntation compared to later once. 
+    To start of with i i worked on the physical side, and implemented a newton solver - without jacobian - and found i could create waves of small amplitude, and periods close to $2 \pi$. 
+    These waves were to the naked eye simmilar to the sine waves but solved the KdV equation and had strict numerical restrictions due to the third derivative that needed to be approximated. 
+    These restrictions made me cast a wider net, and i found that the Newton solver also had a Fourier counterpart
+
+    \subsection{Spectral Newton}
+    In the spectral space the equations became sparse, the travelling waves do not contain a wide spectrum, and is real and symmetric.
+    The equations themselves are not that different and teh change was implemented quite quickly. 
+    As it would turn out however that the main issue of beeing limited in both amplitude and period persited, and another avenue had to be explored. 
+    This came by ways of continuation, by incrementing the amplitude up to the desired size older stable solutions 
+    were built oppon and made larger amplitudes possible. That is one sovles the problem for a small amplitude
+    and use that solution as the initial data for a larger amplitude, until the given amplitude is reached,
+    given it converges. 
 
 
-\chapter*{A - Github repository}
-\addcontentsline{toc}{chapter}{\protect\numberline{}A - Github repository} 
-
-All code and latex-files used in this document are included in the Github repository linked below. Further explanations are given in the readme-file. 
+This concludes the introduction to the travelling waves and the newton solvers. 
 
 
-\subsection*{Github repository link}
-\begin{itemize}
-    \item \url{https://github.com/ninasalvesen/thesis_latex_template}
-\end{itemize}
+\section{Time-dependent KdV}
+Returning to the prospect of solving PDE's i started by looking into linear problems, and ommiting the nonlinearities. 
+Reading [Trefethen et al.] and some of the contempory methods for solving the full equation, 
+in addition to my own experience with the heat equation and the heat kernel, I found the integrating factor mehod appeling.
+By solving the equation in this way i "dicovered" that all linear PDE's of this type could be solved by convolution with a kernel. 
+The form of the kernel was given by the linear relation in question. Testing it on the transport equation and heat equation gave the expected results,
+and i was convinced: The integrating factor method was hot shit. 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-\chapter*{B - Sidenote statistics}
-\addcontentsline{toc}{chapter}{\protect\numberline{}B - Sidenote statistics} 
-
-%For included tables and figures renew the numbering such that they are numbered by the appendix they are attached to and not to the conclusion chapter
-\renewcommand{\thefigure}{B.\arabic{figure}}
-\setcounter{figure}{0}
-\renewcommand{\thetable}{B.\arabic{table}}
-\setcounter{table}{0}
-
-
-\section*{\large{B1 - Some random table}}
-\vspace*{1cm}
-
-Remember to only include one thing per page in the appendices.
-
-\begin{table}[ht!]
-\centering
-    \begin{tabular}{ m{4cm} m{2.5cm} m{2.5cm} m{2.5cm} } 
-    \toprule
-    \toprule
-    \textbf{Statistic} & \textbf{One} & \textbf{Two}  \\
-    \midrule
-    Count   & 387317    & 283960    \\[1.3ex]
-    Mean    & 130.66    & 134.18    \\[1.3ex]
-    Std     & 248.09    & 230.32    \\[1.3ex]
-    Q1      & 31.00     & 21.00     \\[1.3ex]
-    Median  & 67.00     & 63.00     \\[1.3ex]
-    Q3      & 142.00    & 159.00    \\[1.3ex]
-    Min     & 0.00      & 0.00      \\[1.3ex]
-    Max     & 14519.00  & 14253.00  \\[1.3ex]
-    \bottomrule
-    \bottomrule
-    \end{tabular}
-\caption[Statistics on something]{Table of statistics on some sidenote data.}
-\end{table}
-
-
-% Page without title but section title:
-\newpage
-\section*{\large{B2 - Some other random table}}
-\vspace*{1cm}
-
-\begin{table}[ht!]
-\centering
-    \begin{tabular}{ m{4cm} m{2.5cm} m{2.5cm} m{2.5cm} } 
-    \toprule
-    \toprule
-    \textbf{Statistic} & \textbf{Three} & \textbf{Four}  \\
-    \midrule
-    Count   & 387317    & 283960    \\[1.3ex]
-    Mean    & 130.66    & 134.18    \\[1.3ex]
-    Std     & 248.09    & 230.32    \\[1.3ex]
-    Q1      & 31.00     & 21.00     \\[1.3ex]
-    Median  & 67.00     & 63.00     \\[1.3ex]
-    Q3      & 142.00    & 159.00    \\[1.3ex]
-    Min     & 0.00      & 0.00      \\[1.3ex]
-    Max     & 14519.00  & 14253.00  \\[1.3ex]
-    \bottomrule
-    \bottomrule
-    \end{tabular}
-\caption[Statistics on something else]{Table of statistics on some other sidenote data.}
-\end{table}
-
-
-
-\newpage
-\section*{\large{B3 - Some random figure}}
-\vspace*{1cm}
-
-\begin{figure}[H]
-  \centering
-  \subfloat[Data set sizes for data X.]
-  {\includegraphics[width=1\textwidth]{Figures/dataset_X.png}}
-  \hfill
-  \subfloat[Data set sizes for data Y.]
-  {\includegraphics[width=1\textwidth]{Figures/dataset_Y.png}}
-  \caption[Data set sizes]{The figures show the data set sizes of X and Y and the proposed cut-off threshold at 10 $\%$ of the mean set size.}
-\end{figure}
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+My dissolutions were eventually cleared up, but not before i created a full solver using both: integrating factor and split-step to work on the linear and nonlinear parts separatly. 
+If i recall correctly the split step failed when i cleared up in a dealiasing issue, now that i have removed the dealiasing i could warrent a revisit. (adding it to the todo)
