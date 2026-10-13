@@ -1,8 +1,6 @@
 # Code following the structure of ikdv and the note from Mats, Douglas, mm. 
 # HSG 29.09
 
-from traceback import print_list
-
 import numpy as np 
 import numpy.fft as nf
 import matplotlib.pyplot as plt 
@@ -64,23 +62,7 @@ class WaveCollection(ABC):
 
         for eta in self.eta_list:
             eta_hat = nf.fft(eta, axis=1) #fft_x
-            # eta_pad = pad(eta, self.N)
-
-            mask = (np.abs(self.k) < (2/3)*np.max(np.abs(self.k)))
-            eta_m = nf.ifft(eta_hat*mask, axis=1)
-            eta2_hat = nf.fft(eta_m**2, axis=1)
-            # #Dealiasing by padding
-            # Npad = 3*self.N//2
-            # eta2_hat_pad =  nf.fft(eta_pad**2, axis= 1) * 2/3
-            # eta2_hat = np.zeros((int((self.T / self.dt) +1) , self.N), dtype=complex)
-            # N2 = self.N//2
-            # eta2_hat[:,:N2] = eta2_hat_pad[:,:N2]
-            # eta2_hat[:,-(N2-1):] = eta2_hat_pad[:,-(N2-1):]
-
-            # dEtadt  = nf.ifft(
-            #     1j*self.w[:,None] * nf.fft(eta_hat, axis=0), axis=0
-            # ) # fft_t
-
+            eta2_hat = nf.fft(eta**2, axis=1)
             dEtadt = nf.fft(np.gradient(eta, self.dt, axis = 0, edge_order=2), axis=1)
 
             eta_hat_list.append(eta_hat)
@@ -250,10 +232,9 @@ if __name__ == '__main__':
     # wp = WhithamLSM(P=P,N=N, dt=dt, T=T, amp_list=amp_l, mean_list=mean_l)
     # wp = fKdVLSM(P=P,N=N, dt=dt, T=T, amp_list=amp_l, mean_list=mean_l, alpha=2)
     wp = KdVLSM(P=P,N=N, dt=dt, T=T, amp_list=amp_l, mean_list=mean_l)
-
+    idx = 9
     X = wp.solve()
-    idx = 10
-    wp.fit_symbol(idx_range = (N//2-idx+1, N//2+idx), deg = 5)
+    wp.fit_symbol(idx_range = (N//2-idx, N//2+idx), deg = 5)
 
 
     print(fit_table(wp.ell_fit, wp.n_fit, part="real"))

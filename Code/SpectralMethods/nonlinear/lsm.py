@@ -28,6 +28,7 @@ class LSM():
 
         for eta in self.eta_list:
             eta_hat = nf.fft(eta, axis=1)
+            # add (current) highest non-zero k test
             nl_hat = nf.fft(eta**2, axis=1)
             dHdt_hat= nf.fft(np.gradient(eta, self.dt, axis=0, edge_order=2), axis=1)
 
@@ -35,6 +36,7 @@ class LSM():
             nl_hat_list.append(nl_hat)
             dHdt_hat_list.append(dHdt_hat)
 
+        
         H = np.stack(eta_hat_list, axis=0)
         H2 = np.stack(nl_hat_list, axis=0)
         dHdt = np.stack(dHdt_hat_list, axis=0)
@@ -43,7 +45,7 @@ class LSM():
             """Move frequency to axis 0, and flatten (soltion, time) into one sample axis"""
             arr = np.moveaxis(arr, -1,0)
             return arr.reshape(arr.shape[0], -1)
-
+        # crop lists in k, we only want the modes that are significantly non-zero
         Hr      = to_freq_first(H)
         H2r     = to_freq_first(H2)
         dHdtr   = to_freq_first(dHdt)
@@ -54,13 +56,6 @@ class LSM():
 
         A_pinv = np.linalg.pinv(A)
         X = np.einsum('fs,fsc->fc', dHdtr, A_pinv)
-
-
-        # i0 = np.argmin(np.abs(self.k))
-        # i1, i2 = i0+1, i0+2
-        
-        # for arr in (X[:,0], X[:,1]):
-        #     arr[i0] = (4*arr[i1] - arr[i2]) / 3
 
         self.ell    = X[:,0]
         self.n      = X[:,1]
@@ -122,24 +117,24 @@ if __name__ == "__main__":
     w2 = KdVSolver(P = 2*np.pi, target_amp = 0.25, N = 2**8, mean = 0.0)
     w2.solve_w_continuation()
 
-    kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2] + w2.u[:-2], n = 2**8), save_every=1)
-    kdv1.splitStep()
-
-    # kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2], n = 2**8), save_every=1)
+    # kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2] + w2.u[:-2], n = 2**8), save_every=5)
     # kdv1.splitStep()
-    # kdv2 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w2.u[:-2], n = 2**8), save_every=1)
-    # kdv2.splitStep()
 
-    # lsm = LSM([kdv1.u, kdv2.u], kdv1.dt)
-    lsm = LSM([kdv1.u], kdv1.dt)
+    kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2], n = 2**8), save_every=1)
+    kdv1.splitStep()
+    kdv2 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w2.u[:-2], n = 2**8), save_every=1)
+    kdv2.splitStep()
+
+    lsm = LSM([kdv1.u, kdv2.u], kdv1.dt)
+    # lsm = LSM([kdv1.u], kdv1.dt*kdv1.save_every)
     X = lsm.lsm()
 
     k = np.fft.fftfreq(kdv1.N, d = kdv1.P/kdv1.N)*2*np.pi
-    idx = 9
+    idx = kdv1.N//2 - 1
     idx_range = (kdv1.N//2 - idx +1, kdv1.N//2 + idx)
 
     ell , n= lsm.fit_symbol(k, idx_range = idx_range, deg = 5)
-    # print(fit_table(ell, n, part="imag"))
+    print(fit_table(ell, n, part="imag"))
 
 
     order = np.argsort(k)
@@ -154,6 +149,3 @@ if __name__ == "__main__":
     idx_neg = half - ii + 1
     
     lsm.plot_symbol_fit(k, idx_range = (idx_neg, idx), ell_t = lambda k: k**3/6 - k, n_t = lambda k: -0.5*k)
-
-
-   

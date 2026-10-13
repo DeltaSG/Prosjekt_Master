@@ -15,7 +15,6 @@ class SpectralSolver(ABC):
         self.dx         = P/N 
 
         self.k = 2*np.pi*nf.rfftfreq(self.N, self.dx)
-        self.mask = (np.abs(self.k) < (2/3)*np.max(np.abs(self.k)))
 
         self.target_amp = target_amp
         self.mean       = mean
@@ -38,7 +37,7 @@ class SpectralSolver(ABC):
         return nf.irfft(phi_hat, n=self.N)
 
     def nonlinear_hat(self, phi_hat):
-        phi = self.get_physical_phi(phi_hat*self.mask)
+        phi = self.get_physical_phi(phi_hat)
         nl = 0.5*phi**2
         return nf.rfft(nl)
     
@@ -59,7 +58,7 @@ class SpectralSolver(ABC):
         ])
 
     def jv(self, v_hat, phi_hat, c):
-        phi = self.get_physical_phi(phi_hat*self.mask)
+        phi = self.get_physical_phi(phi_hat)
         v   = self.get_physical_phi(v_hat)
         return(
             (self.mk - c)*v_hat + nf.rfft(phi*v)
@@ -194,14 +193,34 @@ def plot(u_list,names, N):
     plt.show()
 
 if __name__ == '__main__':
-    N = 2**3
+
+    def soliton_profile(x,c,x0=0.0):
+        return (c/2)/np.cosh(np.sqrt(c)/2 * (x-x0))**2
+    N = 2**6
     amp = 0.05*2
     mean = 0.0
     P = 2*2*np.pi
 
+    #
+    x = np.linspace(-P/2, P/2, N, endpoint=False)
+    #
+
+    sol = soliton_profile(x,amp)
+    u_sol = np.zeros(N//2+3)
+    u_sol[:-2] = nf.rfft(sol)
+
+    k = 2*np.pi*nf.rfftfreq(n=N, d = P/N)
+
+    # plt.plot(k, u_sol)
+    # plt.show()
+
     kdv = KdVSolver(P=P, target_amp= amp, mean= mean , N = N)
     kdv.solve_w_continuation(n_steps=10)
+    # plt.plot(k, kdv.phi_hat, 'o-')
+    # plt.show()
     # wkdv._plot_()
+
+
 
     whitham = WhithamSolver(P, amp, mean, N)
     whitham.solve_w_continuation()
@@ -211,8 +230,8 @@ if __name__ == '__main__':
     fkdv.solve_w_continuation()
     # fkdv._plot_()
 
-    names = ['KdV' , 'Whitham' , fr'fKdV $\alpha = $ {fkdv.alpha}']
-    u_list = [kdv.u, whitham.u , fkdv.u]
+    names = ['KdV' , 'Whitham' , fr'fKdV $\alpha = $ {fkdv.alpha}', "soliton"]
+    u_list = [kdv.u, whitham.u , fkdv.u, u_sol]
 
     plot(u_list,names, N=N)
 
