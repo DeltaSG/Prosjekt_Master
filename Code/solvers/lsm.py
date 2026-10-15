@@ -15,8 +15,8 @@ class LSM():
         
         # Assuming same dimensions on the dataset:
         N = len(eta_list[0][0])
-        k = 2*np.pi*nf.fftfreq(N, d=P/N)
-        self.ddx = 1j*k
+        self.k = 2*np.pi*nf.fftfreq(N, d=P/N)
+        self.ddx = 1j*self.k
 
     def lsm(self):
         """No dealiasing"""
@@ -64,10 +64,10 @@ class LSM():
         return X
 
 
-    def fit_symbol(self, k, idx_range = None, deg = 3):
+    def fit_symbol(self, idx_range = None, deg = 3):
         """Fit the symbols to a polynomial in k"""
-        order = np.argsort(k)
-        k = k[order]
+        order = np.argsort(self.k)
+        k = self.k[order]
         ell = self.ell[order]
         n = self.n[order]
         if idx_range is not None:
@@ -82,9 +82,9 @@ class LSM():
         return self.ell_fit, self.n_fit 
 
 
-    def plot_symbol_fit(self, k, idx_range = None, ell_t = lambda k:1- k**2/6 , n_t = lambda k: 0.5*np.ones_like(k)):
-        order = np.argsort(k)
-        k = k[order]
+    def plot_symbol_fit(self, idx_range = None, ell_t = lambda k:1- k**2/6 , n_t = lambda k: 0.5*np.ones_like(k)):
+        order = np.argsort(self.k)
+        k = self.k[order]
         ell = self.ell[order]
         n = self.n[order]
         if idx_range is not None:

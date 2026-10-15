@@ -104,11 +104,17 @@ class SpectralNewton(ABC):
             u = self.linesearch(u, amp, err, delta)
         raise RuntimeError('No convergence')
 
-    def solve_w_continuation(self, n_steps= 50):
-        u = np.zeros(self.M+3)
+    def solve_w_continuation(self, n_steps= 50, u0 = None, amp0 = None):
+        if u0 is not None:
+            u = u0
+        else: u = np.zeros(self.M+3)
         u[-2] = self.mk[1]
 
-        for amp in np.linspace(self.target_amp/n_steps, self.target_amp, n_steps):
+        if amp0 is not None:
+            start = amp0
+        else:  start = self.target_amp/n_steps
+        
+        for amp in np.linspace(start, self.target_amp, n_steps):
             u[1] = self.N*amp/2 #updating target amp
             u = self.newton(u, amp)
 
@@ -121,14 +127,16 @@ class SpectralNewton(ABC):
         phi_hat = self.u[:-2]
         c_sol , B_sol = self.u[-2], self.u[-1]
 
-        phi_sol = self.get_physical_phi(phi_hat)
+        phi_sol = self.get_physical(phi_hat)
 
         print(f"amplitude = {(np.max(phi_sol) - np.min(phi_sol))/2}")
         print(f"Wave speed c = {c_sol}")
         print(f"Constant B = {B_sol}")
+        
+        x = np.linspace(0,self.P, self.N, endpoint=False)
 
         fig, axes = plt.subplots(1,2)
-        axes[0].plot(phi_sol, label = r"$\phi$")
+        axes[0].plot(x,phi_sol, label = r"$\phi$")
         axes[1].plot(self.k, phi_hat, label = r"$\hat{\phi}$")
 
         axes[0].grid()

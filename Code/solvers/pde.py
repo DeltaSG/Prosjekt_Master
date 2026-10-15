@@ -18,8 +18,8 @@ class Solver(ABC):
             self.u0 = u0
             self.u0_hat = nf.fft(u0)
         elif u0_hat is not None:
-             self.u0_hat = u0_hat
-             self.u0 = nf.ifft(u0_hat)
+            self.u0_hat = u0_hat
+            self.u0 = nf.ifft(u0_hat)
         else: raise ValueError("u0 or u0_hat must be given.")
 
         self.N  = len(self.u0)
