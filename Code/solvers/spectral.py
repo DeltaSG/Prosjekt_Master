@@ -3,6 +3,7 @@
 import numpy as np 
 import numpy.fft as nf 
 import matplotlib.pyplot as plt 
+from solvers.help import *
 
 from abc import ABC, abstractmethod # For making abstract classes / methods 
 
@@ -148,15 +149,12 @@ class SpectralNewton(ABC):
 class KdVNewton(SpectralNewton):
     """Newton solver for KdV"""
     def dispersion(self, k):
-        return 1 - k**2 /6
+        return kdVDispersion(k)
     
 class WhithamNewton(SpectralNewton):
     """Newton solver for Whithams k"""
     def dispersion(self, k):
-        mk = np.ones_like(k)
-        nz = k != 0
-        mk[nz] = np.sqrt( np.tanh(k[nz]) / k[nz])
-        return mk
+        return whithamDispersion(k)
 
 class fKdVNewton(SpectralNewton):
     """Newton solver for fKdV: $m(k) = -|k|^a"""
@@ -165,12 +163,7 @@ class fKdVNewton(SpectralNewton):
         super().__init__(P, target_amp, mean, N)
         
     def dispersion(self, k):
-        if self.alpha < 0:
-            mk = np.zeros_like(k)
-            nz = k != 0
-            mk[nz] = - np.abs(k[nz])**self.alpha
-            return mk     
-        return - np.abs(k)**self.alpha
+        return fKdVDispersion(self.alpha)(k)
     
     
 def plot(u_list,names, N):

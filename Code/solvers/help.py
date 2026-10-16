@@ -7,6 +7,28 @@ from matplotlib.widgets import Slider
 from IPython.display import HTML
 import pandas as pd
 
+def kdVDispersion(k):
+    return 1-k**2/6
+
+def fKdVDispersion(alpha):
+    def mk(k):
+        if alpha < 0:
+            mk = np.zeros_like(k)
+            nz = k != 0
+            mk[nz] = - np.abs(k[nz])**alpha
+            return mk     
+        return - np.abs(k)**alpha
+    return mk
+
+def whithamDispersion(k):
+    mk = np.ones_like(k)
+    nz = k != 0
+    mk[nz] = np.sqrt( np.tanh(k[nz]) / k[nz])
+    return mk
+
+def n_theory(k):
+    return 0.5*np.ones_like(k)
+
 def make_x_array(N:int , L:float , symmetric:bool) -> np.ndarray:
     x = np.linspace(
         -L/2, L/2, N, endpoint=False
