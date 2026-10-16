@@ -57,3 +57,21 @@ class KdVPacket(WavePacket):
     
     def waveSolver(self, u0):
         return KdV(P=self.P, dt=self.dt, T = self.T, u0=u0)
+
+class fKdVPacket(WavePacket):
+    def __init__(self, P, N, amp_list, mean_list, dt, T, alpha):
+        self.alpha = alpha
+        super().__init__(P, N, amp_list, mean_list, dt, T)
+
+    def waveProfile(self, amp, mean):
+        return fKdVNewton(P=self.P, target_amp=amp, mean = mean, N=self.N, alpha=self.alpha)
+
+    def waveSolver(self, u0):
+        return fKdV(P=self.P, dt=self.dt, T = self.T, u0=u0, alpha=self.alpha)
+
+class WhithamPacket(WavePacket):
+    def waveProfile(self, amp, mean):
+        return WhithamNewton(P=self.P, target_amp=amp, mean = mean, N=self.N)
+    
+    def waveSolver(self, u0):
+        return Whitham(P=self.P, dt=self.dt, T = self.T, u0=u0)
