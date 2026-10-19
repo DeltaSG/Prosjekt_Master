@@ -97,15 +97,12 @@ class Solver(ABC):
 class KdV(Solver):
     """Solving the KdV equation over time (0,T)"""
     def dispersion(self, k):
-        return 1 - k**2 /6
+        return kdVDispersion(k)
 
 class Whitham(Solver):
     """Solving the Withams equation over time (0,T)"""
     def dispersion(self, k):
-        mk = np.ones_like(k)
-        nz = k != 0
-        mk[nz] = np.sqrt( np.tanh(k[nz]) / k[nz])
-        return mk
+        return whithamDispersion(k)
 
 class fKdV(Solver):
     """Solving the fKdV equation over time (0,T)"""
@@ -114,12 +111,7 @@ class fKdV(Solver):
             super().__init__( P = P,dt=dt, T=T, u0=u0, u0_hat=u0_hat, save_every=save_every)
         
     def dispersion(self, k):
-        if self.alpha < 0:
-            mk = np.zeros_like(k)
-            nz = k != 0
-            mk[nz] = - np.abs(k[nz])**self.alpha
-            return mk     
-        return - np.abs(k)**self.alpha
+        return fKdVDispersion(self.alpha)(k)
 
 
 if __name__ == '__main__':
