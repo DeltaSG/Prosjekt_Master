@@ -35,29 +35,6 @@ def make_x_array(N:int , L:float , symmetric:bool) -> np.ndarray:
         ) if symmetric else np.linspace(0,L,N,endpoint = False)
     return x
 
-def conservationOnL(N,L,f= lambda x: 0.5*np.cos(2*x),g = lambda x: np.sin(x),Lk = lambda k: 1 - (k**2)/6):
-    """Testing inner product property of L.
-    N: Number of points in the array.
-    L: Domain of the array (symmetric).
-    f,g: Test-functions.
-    Lk: The spectral linear operator as a function of k.  """
-
-    x = make_x_array(N,L,symmetric=True)
-    dx = x[1]-x[0]
-
-    k = np.fft.fftfreq(N,d = dx)*2*np.pi
-
-    mk = Lk(k)
-
-    u = np.fft.fft(f(x))
-    v = np.fft.fft(g(x))
-
-    s1 = np.inner(mk*u, v)
-    s2 = np.inner(u, mk*v)
-    assert np.allclose(s1,s2, atol=1e-12) , "The Linear operator (Lk) is not self adjoint"
-    assert np.all(np.isreal(mk)), "The Linear operator (Lk) is not real"
-    return 0
-
 def pad(u_hat, N):
     """Zero-pad a spectrum (..., N) to (..., 3N/2) along the last axis."""
     Npad = 3*N//2
@@ -133,9 +110,6 @@ def animate_solution(x, u, interval = 40):
     # plt.close(fig)
     return anim
 
-
-
-
 def animate_solution_nb(x, u, stride=10, interval=40):
     """Plays the solution u (n_frames, N) over x once, in a notebook."""
     frames = range(0, u.shape[0], stride)
@@ -154,6 +128,29 @@ def animate_solution_nb(x, u, stride=10, interval=40):
     anim = FuncAnimation(fig, update, frames=frames, interval=interval, repeat=False)
     plt.close(fig)  # stops the static figure from showing up as well
     return HTML(anim.to_jshtml(default_mode="once"))
+
+def conservationOnL(N,L,f= lambda x: 0.5*np.cos(2*x),g = lambda x: np.sin(x),Lk = lambda k: 1 - (k**2)/6):
+    """Testing inner product property of L.
+    N: Number of points in the array.
+    L: Domain of the array (symmetric).
+    f,g: Test-functions.
+    Lk: The spectral linear operator as a function of k.  """
+
+    x = make_x_array(N,L,symmetric=True)
+    dx = x[1]-x[0]
+
+    k = np.fft.fftfreq(N,d = dx)*2*np.pi
+
+    mk = Lk(k)
+
+    u = np.fft.fft(f(x))
+    v = np.fft.fft(g(x))
+
+    s1 = np.inner(mk*u, v)
+    s2 = np.inner(u, mk*v)
+    assert np.allclose(s1,s2, atol=1e-12) , "The Linear operator (Lk) is not self adjoint"
+    assert np.all(np.isreal(mk)), "The Linear operator (Lk) is not real"
+    return 0
 
 def mass(u,dx):
     U = np.asarray(u)
@@ -179,10 +176,10 @@ def hamiltonian(u,mk,dx):
 
 def conservationInfo(unit, name:str = "Mass"):
     print(5*"-","Conservation of ", name , 5*"-" )
-    print(f"Initial {name}: {unit[0].real:.3f}")
-    print(f"Final {name}: {unit[-1].real:.3f}")
-    print(f"Maximum error: {(np.max(np.abs(unit -unit[0]).real)):.3f}")
-    print(f"Relative error: {((np.max(np.abs(unit -unit[0]))/np.abs(unit[0]).real)):.3f}")
+    print(f"Initial {name}: {unit[0].real:.2e}")
+    print(f"Final {name}: {unit[-1].real:.2e}")
+    print(f"Maximum error: {(np.max(np.abs(unit -unit[0]).real)):.2e}")
+    print(f"Relative error: {((np.max(np.abs(unit -unit[0]))/np.abs(unit[0]).real)):.2e}")
     print(30*"-")
 
 def fit_table(ell, n, part="imag"):

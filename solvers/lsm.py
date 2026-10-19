@@ -52,6 +52,16 @@ class LSM():
             [Hr, H2r] , axis= 1
         )
 
+        # ----- Looking at the two data columns -----------
+        col_norm = np.linalg.norm(A, axis=2)
+        A_n = A/np.where(col_norm[...,None]==0,1, col_norm[..., None])
+        sv = np.linalg.svd(A_n, compute_uv=False)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            self.sv_ratio   = sv[:,1]/sv[:,0]
+            self.cond       = sv[:,0]/sv[:,1]
+        self.col_norm = col_norm
+        # -------------------------------------------------
+
         A_pinv = np.linalg.pinv(A)
         X = np.einsum('fs,fsc->fc', dHdtr, A_pinv)
 
@@ -95,7 +105,7 @@ class LSM():
         ell_theory = ell_t(k)
         n_theory   = n_t(k)
 
-        fig, ax = plt.subplots(1,2)
+        fig, ax = plt.subplots(1,2, figsize = (15,3))
         ax[0].plot(k, ell.real, label = "ell", marker='o', linestyle='-', markersize=3)
         ax[0].plot(k, ell_theory, label = "theory", marker='x', linestyle=':', markersize=3)
         ax[0].legend()
@@ -136,7 +146,7 @@ if __name__ == "__main__":
     idx = 5 #int(id*np.pi)#kdv1.N//2 - 1
     idx_range = (kdv1.N//2 - idx, kdv1.N//2 + idx + 1)
 
-    ell , n= lsm.fit_symbol(k, idx_range = idx_range, deg = 5)
+    ell , n= lsm.fit_symbol(idx_range = idx_range, deg = 5)
     print(fit_table(ell, n, part="real"))
 
 
@@ -151,4 +161,4 @@ if __name__ == "__main__":
     idx = half + ii
     idx_neg = half - ii + 1
     
-    lsm.plot_symbol_fit(k, idx_range = (idx_neg, idx), ell_t = lambda k: 1-k**2/6)
+    lsm.plot_symbol_fit(idx_range = (idx_neg, idx), ell_t = lambda k: 1-k**2/6)
