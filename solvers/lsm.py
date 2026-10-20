@@ -14,8 +14,8 @@ class LSM():
         self.dt = dt
         
         # Assuming same dimensions on the dataset:
-        N = len(eta_list[0][0])
-        self.k = 2*np.pi*nf.fftfreq(N, d=P/N)
+        self.N = len(eta_list[0][0])
+        self.k = 2*np.pi*nf.fftfreq(self.N, d=P/self.N)
         self.ddx = 1j*self.k
 
     def lsm(self):
@@ -93,14 +93,15 @@ class LSM():
 
 
     def plot_symbol_fit(self, idx_range = None, ell_t = lambda k:1- k**2/6 , n_t = lambda k: 0.5*np.ones_like(k)):
+        if idx_range is None:
+            idx_range = (2 , -1)
         order = np.argsort(self.k)
         k = self.k[order]
         ell = self.ell[order]
         n = self.n[order]
-        if idx_range is not None:
-            k = k[idx_range[0]:idx_range[1]]
-            ell = ell[idx_range[0]:idx_range[1]]
-            n = n[idx_range[0]:idx_range[1]]
+        k = k[idx_range[0]:idx_range[1]]
+        ell = ell[idx_range[0]:idx_range[1]]
+        n = n[idx_range[0]:idx_range[1]]
 
         ell_theory = ell_t(k)
         n_theory   = n_t(k)
