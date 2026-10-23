@@ -9,12 +9,12 @@ from abc import ABC, abstractmethod # For making abstract classes / methods
 
 
 class SpectralNewton(ABC):
-    def __init__(self, P, target_amp, mean, N):
+    def __init__(self, P, target_amp, mean, dx):
         self.P          = P
-        self.N          = N
-        self.dx         = P/N 
-        
-        self.k          = 2*np.pi*nf.rfftfreq(N,d=self.dx)
+        self.dx          = dx
+        self.N         = round(P/dx)
+        assert abs(self.N*dx - P) < 1e-9, "P/dx must be an integer"
+        self.k          = 2*np.pi*nf.rfftfreq(self.N,d=self.dx)
         
         self.target_amp = target_amp
         self.mean       = mean
@@ -121,6 +121,7 @@ class SpectralNewton(ABC):
 
         self.u = u
         self.phi_hat = self.u[:-2]
+        self.phi_hat_mid = self.phi_hat *(-1.0)**np.arange(len(self.phi_hat))
         self.c       = self.u[-2]
         self.B       = self.u[-1]
         
@@ -158,9 +159,9 @@ class WhithamNewton(SpectralNewton):
 
 class fKdVNewton(SpectralNewton):
     """Newton solver for fKdV: $m(k) = -|k|^a"""
-    def __init__(self, P, target_amp, mean, N, alpha):
+    def __init__(self, P, target_amp, mean, dx, alpha):
         self.alpha = alpha
-        super().__init__(P, target_amp, mean, N)
+        super().__init__(P, target_amp, mean, dx)
         
     def dispersion(self, k):
         return fKdVDispersion(self.alpha)(k)
@@ -193,6 +194,7 @@ if __name__ == '__main__':
     amp = 0.05*2
     mean = 0.0
     P = 2*2*np.pi
+    dx = np.pi*1e-1
 
     #
     x = np.linspace(-P/2, P/2, N, endpoint=False)
@@ -201,25 +203,15 @@ if __name__ == '__main__':
 
     k = 2*np.pi*nf.rfftfreq(n=N, d = P/N)
 
-    # plt.plot(k, u_sol)
-    # plt.show()
-
-    kdv = KdVNewton(P=P, target_amp= amp, mean= mean , N = N)
+    kdv = KdVNewton(P=P, target_amp= amp, mean= mean , dx = dx)
     kdv.solve_w_continuation(n_steps=10)
-    # plt.plot(k, kdv.phi_hat, 'o-')
-    # plt.show()
-    # wkdv._plot_()
-
-
-
-    whitham = WhithamNewton(P, amp, mean, N)
+    
+    whitham = WhithamNewton(P, amp, mean, dx)
     whitham.solve_w_continuation()
-    # witham._plot_()
 
-    fkdv = fKdVNewton(P,amp, mean, N, alpha= 2) # Same as KdV
+    fkdv = fKdVNewton(P,amp, mean, dx, alpha= 2) # Same as KdV
     fkdv.solve_w_continuation()
     # fkdv._plot_()
-
     names = ['KdV' , 'Whitham' , fr'fKdV $\alpha = $ {fkdv.alpha}']
     u_list = [kdv.u, whitham.u , fkdv.u]
 

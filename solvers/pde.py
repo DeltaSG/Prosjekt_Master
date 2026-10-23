@@ -62,9 +62,7 @@ class Solver(ABC):
         E = np.exp(-self.ddx*self.mk*self.dt / 2)
         
         while t_current < self.T - 1e-9*self.dt:
-            h = self.dt # min(self.dt , self.T- t_current) #Truncating final step
-            # if h != self.dt:
-            #     E = np.exp(-self.ddx*self.mk*h/ 2)
+            h = self.dt
 
             u_hat = E*self.rk4_step(u_hat*E,h)
 
