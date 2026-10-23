@@ -34,21 +34,21 @@ class SpectralNewton(ABC):
         return phi_hat, c, B
     
     def get_physical(self, phi_hat):
-        return nf.irfft(phi_hat, n = self.N)
+        return nf.irfft(self.N*phi_hat, n = self.N)
     
     def nonlinear_hat(self, phi_hat):
         phi = self.get_physical(phi_hat)
-        return 0.5* nf.rfft(phi**2)
+        return 0.5* nf.rfft(phi**2) / self.N
     
     def residual(self, u, amp):
         phi_hat, c, B = self.build_phi_hat(u)
         nl_hat = self.nonlinear_hat(phi_hat)
         
         F = (self.mk - c)*phi_hat + nl_hat
-        F[0] -= B*self.N
+        F[0] -= B
         
-        mean_eq = phi_hat[0] - self.N*self.mean
-        amp_eq  = phi_hat[1] - self.N*amp/2
+        mean_eq = phi_hat[0] - self.mean
+        amp_eq  = phi_hat[1] - amp/2
         
         return np.concatenate([
             np.real_if_close(F),
@@ -59,7 +59,7 @@ class SpectralNewton(ABC):
     def jv(self, v_hat, phi_hat, c):
         phi = self.get_physical(phi_hat)
         v   = self.get_physical(v_hat)
-        return (self.mk-c)*v_hat + nf.rfft(phi*v)
+        return (self.mk-c)*v_hat + nf.rfft(phi*v) / self.N
     
     def jacobian(self, u):
         phi_hat, c, B = self.build_phi_hat(u)
@@ -71,7 +71,7 @@ class SpectralNewton(ABC):
             
             J[:self.M+1,j] = np.real(self.jv(e,phi_hat,c))
         J[:self.M+1,-2] = -np.real(phi_hat) #dF/dc
-        J[0,-1]         = -self.N           #dF/dB
+        J[0,-1]         = -1          #dF/dB
         
         J[self.M+1,0] = 1 # For the mean value
         J[self.M+2,1] = 1 # for the amplitude 
@@ -116,7 +116,7 @@ class SpectralNewton(ABC):
         else:  start = self.target_amp/n_steps
         
         for amp in np.linspace(start, self.target_amp, n_steps):
-            u[1] = self.N*amp/2 #updating target amp
+            u[1] = amp/2 #updating target amp
             u = self.newton(u, amp)
 
         self.u = u
@@ -172,7 +172,7 @@ def plot(u_list,names, N):
     for sol,name in zip(u_list,names):
         phi_hat = sol[:-2]
         # c_sol , B_sol = sol[-2], sol[-1]
-        phi_sol = nf.irfft(phi_hat, n = N)
+        phi_sol = nf.irfft(N*phi_hat, n = N)
         
         axes[0].plot(phi_sol, label = name, alpha = 0.7)
         axes[1].plot(phi_hat, label = name, alpha = 0.7)
