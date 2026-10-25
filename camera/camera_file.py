@@ -15,4 +15,4 @@ class Camera():
         self.dx = L/N
 
         #array used for plotting
-        self.x = np.linspace(-L/2, L/2 , N)
+        self.x = np.linspace(-L/2, L/2 , N, endpoint=False)

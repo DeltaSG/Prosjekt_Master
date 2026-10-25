@@ -165,6 +165,38 @@ class fKdVNewton(SpectralNewton):
         
     def dispersion(self, k):
         return fKdVDispersion(self.alpha)(k)
+
+class SolitonNewton(SpectralNewton):
+    def _weights(self):
+        w = np.full(self.M + 1, 2.0); w[0] = 1.0; w[-1] = 1.0
+        return w                                  # phi(0) = sum(w * phi_hat)
+
+    def residual(self, u, amp):
+        phi_hat, c, B = self.build_phi_hat(u)
+        F = (self.mk - c)*phi_hat + self.nonlinear_hat(phi_hat)
+        F[0] -= B
+        peak_eq = np.sum(self._weights()*phi_hat) - amp
+        return np.concatenate([np.real_if_close(F), [B], [peak_eq]])
+
+    def jacobian(self, u):
+        J = super().jacobian(u)                   # rows 0..M are unchanged
+        J[self.M+1, :] = 0; J[self.M+1, -1] = 1   # d(B)/dB
+        J[self.M+2, :] = 0; J[self.M+2, :self.M+1] = self._weights()
+        return J
+
+    def solve_soliton(self, amp):
+        # exact KdV guess for 1 - k^2/6 (see below); Newton polishes it
+        kappa = np.sqrt(amp/2)
+        x = self.dx*np.arange(self.N)
+        d = (x + self.P/2) % self.P - self.P/2    # distance to nearest crest
+        phi0 = nf.rfft(amp/np.cosh(kappa*d)**2)/self.N
+        u0 = np.concatenate([phi0.real, [1 + amp/3, 0.0]])
+        self.u = self.newton(u0, amp)
+        self.phi_hat, self.c, self.B = self.u[:-2], self.u[-2], self.u[-1]
+
+class KdVSoliton(SolitonNewton):
+    def dispersion(self, k):
+        return kdVDispersion(k)
     
     
 def plot(u_list,names, N):
@@ -203,16 +235,20 @@ if __name__ == '__main__':
 
     k = 2*np.pi*nf.rfftfreq(n=N, d = P/N)
 
-    kdv = KdVNewton(P=P, target_amp= amp, mean= mean , dx = dx)
-    kdv.solve_w_continuation(n_steps=10)
+    # kdv = KdVNewton(P=P, target_amp= amp, mean= mean , dx = dx)
+    # kdv.solve_w_continuation(n_steps=10)
     
-    whitham = WhithamNewton(P, amp, mean, dx)
-    whitham.solve_w_continuation()
+    # whitham = WhithamNewton(P, amp, mean, dx)
+    # whitham.solve_w_continuation()
 
-    fkdv = fKdVNewton(P,amp, mean, dx, alpha= 2) # Same as KdV
-    fkdv.solve_w_continuation()
-    # fkdv._plot_()
-    names = ['KdV' , 'Whitham' , fr'fKdV $\alpha = $ {fkdv.alpha}']
-    u_list = [kdv.u, whitham.u , fkdv.u]
+    # fkdv = fKdVNewton(P,amp, mean, dx, alpha= 2) # Same as KdV
+    # fkdv.solve_w_continuation()
+    # # fkdv._plot_()
+    # names = ['KdV' , 'Whitham' , fr'fKdV $\alpha = $ {fkdv.alpha}']
+    # u_list = [kdv.u, whitham.u , fkdv.u]
 
-    plot(u_list,names, N=N)
+    # plot(u_list,names, N=N)
+
+    sol = KdVSoliton(20*np.pi,amp, mean, dx)
+    sol.solve_w_continuation()
+    sol._plot_()
