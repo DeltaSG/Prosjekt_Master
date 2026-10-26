@@ -59,15 +59,15 @@ class fKdVPacket(WavePacket):
         self.alpha = alpha
         super().__init__(P, N, amp_list, mean_list, dt, T)
 
-    def waveProfile(self, amp, mean):
-        return fKdVNewton(P=self.P, target_amp=amp, mean = mean, N=self.N, alpha=self.alpha)
+    def waveProfile(self, P,amp, mean):
+        return fKdVNewton(P=P, target_amp=amp, mean = mean,camera=self.camera, alpha=self.alpha)
 
     def waveSolver(self, u0):
         return fKdV( camera=self.camera, T = self.T, u0=u0, alpha=self.alpha)
 
 class WhithamPacket(WavePacket):
-    def waveProfile(self, amp, mean):
-        return WhithamNewton(P=self.P, target_amp=amp, mean = mean, N=self.N)
+    def waveProfile(self,P, amp, mean):
+        return WhithamNewton(P=P, target_amp=amp, mean = mean, camera=self.camera)
     
     def waveSolver(self, u0):
         return Whitham(camera=self.camera, T = self.T, u0=u0)
