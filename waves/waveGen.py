@@ -53,7 +53,7 @@ class WavePacket(ABC):
     
 class KdVPacket(WavePacket):
     def waveProfile(self, amp, mean):
-        return KdVNewton(P=self.P, target_amp=amp, mean = mean, N=self.N)
+        return KdVNewton(P=self.P, target_amp=amp, mean = mean, dx = self.P/self.N)
     
     def waveSolver(self, u0):
         return KdV(P=self.P, dt=self.dt, T = self.T, u0=u0)

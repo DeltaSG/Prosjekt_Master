@@ -62,8 +62,8 @@ class Solver(ABC):
 
             u_hat = E*self.rk4_step(u_hat*E,h)
 
-            t_current += h
             step_count += 1
+            t_current = h*step_count
 
             if step_count % self.save_every == 0 or t_current >= self.T - 1e-14:
                         t_list.append(t_current)
