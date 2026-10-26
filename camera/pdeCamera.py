@@ -1,9 +1,3 @@
-# This file shall contain the numerical pde solvers of the waves
-
-# Solver for the general u_t + ikLu + 0.5ikN(u^2) formulation. 
-# Solved with the StrangStep, and using same setup as in Spectral solver
-# HSG 28.09
-
 import numpy as np
 import numpy.fft as nf
 import matplotlib.pyplot as plt
