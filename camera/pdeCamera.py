@@ -8,7 +8,7 @@ from camera.spectralCamera import *
 from solvers.help import *
 
 class Solver(ABC):
-    def __init__(self, P, camera: Camera, T,u0 = None, u0_hat = None, save_every:int = 1):
+    def __init__(self, camera: Camera, T,u0 = None, u0_hat = None, save_every:int = 1):
         if u0 is not None:
             self.u0 = u0
             self.u0_hat = nf.fft(u0)
@@ -18,9 +18,8 @@ class Solver(ABC):
         else: raise ValueError("u0 or u0_hat must be given.")
 
         self.N  = len(self.u0)
-        self.P  = P
         self.camera = camera
-        assert abs(self.N*camera.dx - P) < 1e-9, "P/dx must be an integer"
+        # assert abs(self.N*camera.dx - P) < 1e-9, "P/dx must be an integer"
         
 
         self.k = nf.fftfreq(self.N, d=camera.dx) * 2*np.pi
@@ -101,9 +100,9 @@ class Whitham(Solver):
 
 class fKdV(Solver):
     """Solving the fKdV equation over time (0,T)"""
-    def __init__(self, P,camera, T, alpha,u0 = None, u0_hat = None, save_every:int = 1):
+    def __init__(self,camera, T, alpha,u0 = None, u0_hat = None, save_every:int = 1):
             self.alpha = alpha
-            super().__init__( P = P,camera=camera, T=T, u0=u0, u0_hat=u0_hat, save_every=save_every)
+            super().__init__(camera=camera, T=T, u0=u0, u0_hat=u0_hat, save_every=save_every)
         
     def dispersion(self):
         return fKdVDispersion(self.alpha)(self.k)
@@ -123,8 +122,8 @@ if __name__ == '__main__':
     
     u0 = soliton(x,c,x0)
 
-    kdv = KdV(u0=u0, P=P,camera=c1, T=1)
+    kdv = KdV(u0=u0,camera=c1, T=1)
     t, u = kdv.splitStep()
 
-    anim = animate_solution(x,u)
+    anim = animate_solution(c1.x,u)
     plt.show()

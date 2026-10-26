@@ -140,16 +140,15 @@ if __name__ == "__main__":
     # kdv1 = KdV(P = 2*np.pi, dt = 5e-3, T = 1, u0 = np.fft.irfft(w1.u[:-2] + w2.u[:-2], n = 2**8), save_every=5)
     # kdv1.splitStep()
 
-    kdv1 = KdV(P = 2*np.pi, camera  =c1, T = 1, u0 = np.fft.irfft(w1.u[:-2], n = N), save_every=1)
+    kdv1 = KdV(camera  =c1, T = 1, u0 = np.fft.irfft(w1.u[:-2], n = N), save_every=1)
     kdv1.splitStep()
-    kdv2 = KdV(P = 2*np.pi, camera  =c1, T = 1, u0 = np.fft.irfft(w2.u[:-2], n = N), save_every=1)
+    kdv2 = KdV(camera  =c1, T = 1, u0 = np.fft.irfft(w2.u[:-2], n = N), save_every=1)
     kdv2.splitStep()
 
     lsm = LSM([kdv1.u, kdv2.u], camera  =c1)
     # lsm = LSM([kdv1.u], kdv1.dt*kdv1.save_every)
     X = lsm.lsm()
 
-    k = np.fft.fftfreq(kdv1.N, d = kdv1.P/kdv1.N)*2*np.pi
     idx = kdv1.N//2 - 1
     idx_range = (kdv1.N//2 - idx, kdv1.N//2 + idx + 1)
 
@@ -157,9 +156,9 @@ if __name__ == "__main__":
     print(fit_table(ell, n, part="real"))
 
 
-    order = np.argsort(k)
+    order = np.argsort(c1.k)
     half = kdv1.N//2
-    k_o = k[order]
+    k_o = c1.k[order]
     X_0 = X[order,0]
     X_1 = X[order,1]
 
