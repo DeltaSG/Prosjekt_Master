@@ -10,10 +10,10 @@ from camera.camera_file import Camera
 
 class LSM():
     """A class that takes in a tensor of data and uses the least squares method to estimate the symbols"""
-    def __init__(self, eta_list, camera:Camera):
+    def __init__(self, eta_list, camera:Camera, drop_frames:int = 1):
         self.eta_list = eta_list
         self.camera = camera
-        
+        self.drop_frames = drop_frames
         self.ddx = 1j*camera.k
 
     def lsm(self):
@@ -21,6 +21,8 @@ class LSM():
         eta_hat_list = []
         nl_hat_list  = []
         dHdt_hat_list= []
+
+        sl = slice(self.drop_frames, -self.drop_frames)
 
         for eta in self.eta_list:
             M = len(eta[0])
@@ -35,10 +37,11 @@ class LSM():
             dHdt_hat= nf.fft(np.gradient(eta, self.camera.dt, axis=0, edge_order=2), axis=1)
             # time derivative in Fourier space:
             # dt_f = 
-
-            eta_hat_list.append(eta_hat)
-            nl_hat_list.append(nl_hat)
-            dHdt_hat_list.append(dHdt_hat)
+            #removing edge frames
+            
+            eta_hat_list.append(eta_hat[sl])
+            nl_hat_list.append(nl_hat[sl])
+            dHdt_hat_list.append(dHdt_hat[sl])
 
         
         H = np.stack(eta_hat_list, axis=0)
