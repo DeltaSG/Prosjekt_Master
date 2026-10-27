@@ -18,6 +18,7 @@ class SpectralNewton(ABC):
         
         self.mk = self.dispersion()
         self.M = len(self.k) - 1
+        self.hw = self._height_weights()
         
     @abstractmethod
     def dispersion(self):
@@ -32,6 +33,13 @@ class SpectralNewton(ABC):
     
     def get_physical(self, phi_hat):
         return nf.irfft(self.N*phi_hat, n = self.N)
+
+    def _height_weights(self):
+        w = np.zeros(self.M +1)
+        w[1::2] = 2.0
+        if self.N%2 == 0 and self.M % 2 == 1: # Nyquist index M is odd: weight should be 1
+            w[-1] = 1.0
+        return w
     
     def nonlinear_hat(self, phi_hat):
         phi = self.get_physical(phi_hat)
@@ -45,7 +53,7 @@ class SpectralNewton(ABC):
         F[0] -= B
         
         mean_eq = phi_hat[0] - self.mean
-        amp_eq  = phi_hat[1] - amp/2
+        amp_eq  = np.sum(self.hw.copy()*phi_hat) - amp
         
         return np.concatenate([
             np.real_if_close(F),
@@ -71,7 +79,7 @@ class SpectralNewton(ABC):
         J[0,-1]         = -1          #dF/dB
         
         J[self.M+1,0] = 1 # For the mean value
-        J[self.M+2,1] = 1 # for the amplitude 
+        J[self.M+2,:self.M+1] = self.hw # for the amplitude 
         
         return J
     
@@ -221,7 +229,7 @@ if __name__ == '__main__':
     mean = 0.0
     P = 2*2*np.pi
     
-    c1 = Camera(P,N)
+    c1 = Camera(P,N,1)
 
     kdv = KdVNewton(P=P, target_amp= amp, mean= mean , camera=c1)
     kdv.solve_w_continuation(n_steps=10)

@@ -33,6 +33,8 @@ class LSM():
             # add (current) highest non-zero k test
             nl_hat = - self.ddx * nf.fft(eta**2, axis=1)
             dHdt_hat= nf.fft(np.gradient(eta, self.camera.dt, axis=0, edge_order=2), axis=1)
+            # time derivative in Fourier space:
+            # dt_f = 
 
             eta_hat_list.append(eta_hat)
             nl_hat_list.append(nl_hat)
