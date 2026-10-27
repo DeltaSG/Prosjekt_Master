@@ -249,18 +249,20 @@ if __name__ == '__main__':
 
     kdv = KdVNewton(P=P, target_amp= amp, mean= mean , camera=c1)
     kdv.solve_w_continuation(n_steps=10)
+    kdv.test_alias()
     # kdv._plot_()
     
     whitham = WhithamNewton(P, amp, mean, camera=c1)
     whitham.solve_w_continuation()
+    whitham.test_alias()
 
-    fkdv = fKdVNewton(P,amp, mean, camera=c1, alpha= 2) # Same as KdV
-    fkdv.solve_w_continuation()
-    # # fkdv._plot_()
-    names = ['KdV' , 'Whitham' , fr'fKdV $\alpha = $ {fkdv.alpha}']
-    u_list = [kdv.u, whitham.u , fkdv.u]
+    # fkdv = fKdVNewton(P,amp, mean, camera=c1, alpha= 2) # Same as KdV
+    # fkdv.solve_w_continuation()
+    # # # fkdv._plot_()
+    # names = ['KdV' , 'Whitham' , fr'fKdV $\alpha = $ {fkdv.alpha}']
+    # u_list = [kdv.u, whitham.u , fkdv.u]
 
-    plot(u_list,names, N=N)
+    # plot(u_list,names, N=N)
 
     # sol = KdVSoliton(20*np.pi,amp, mean, camera=c1)
     # sol.solve_w_continuation()
