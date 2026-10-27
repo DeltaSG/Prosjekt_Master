@@ -79,13 +79,13 @@ class Solver(ABC):
     
             u = self.u
             #Mass
-            m = mass(u,self.dx)
+            m = mass(u,self.camera.dx)
             conservationInfo(m,"Mass")
             # L2
-            l = l2(u,self.dx)
+            l = l2(u,self.camera.dx)
             conservationInfo(l, "L2")
             #Hamiltonian
-            h = hamiltonian(u,self.mk,self.dx)
+            h = hamiltonian(u,self.mk,self.camera.dx)
             conservationInfo(h, "Hamiltonian")
 
 class KdV(Solver):
