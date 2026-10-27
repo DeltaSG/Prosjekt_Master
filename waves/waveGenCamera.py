@@ -37,7 +37,7 @@ class WavePacket(ABC):
         for i in range(len(self.amps)):
             wavep = self.waveProfile(P = self.Ps[i], amp=self.amps[i] , mean=self.means[i])
             wavep.solve_w_continuation()
-            phi0 = nf.irfft(wavep.phi_hat)
+            phi0 = wavep.get_physical(wavep.phi_hat)
             twave = self.waveSolver(u0= phi0)
             _, phi = twave.splitStep()
             

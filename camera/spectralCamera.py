@@ -40,10 +40,28 @@ class SpectralNewton(ABC):
         if self.N%2 == 0 and self.M % 2 == 1: # Nyquist index M is odd: weight should be 1
             w[-1] = 1.0
         return w
+
+    def product_hat(self, a_hat, b_hat):
+        """3/2-rule, coefficients of a*b"""
+        N,M = self.N, self.M
+        Np = 3*N//2
+
+        a = np.zeros(Np//2 +1, dtype=complex)
+        b = np.zeros(Np//2 +1, dtype=complex)
+
+        a[:M] = a_hat[:M]
+        b[:M] = b_hat[:M]
+
+        a_fine = nf.irfft(Np*a, n=Np)
+        b_fine = nf.irfft(Np*b, n=Np)
+        p_hat = nf.rfft(a_fine*b_fine)/Np
+
+        out = np.zeros(M+1, dtype=complex)
+        out[:M] = p_hat[:M]
+        return out
     
     def nonlinear_hat(self, phi_hat):
-        phi = self.get_physical(phi_hat)
-        return 0.5* nf.rfft(phi**2) / self.N
+        return 0.5*self.product_hat(phi_hat,phi_hat)
     
     def residual(self, u, amp):
         phi_hat, c, B = self.build_phi_hat(u)
@@ -62,9 +80,7 @@ class SpectralNewton(ABC):
         ])
         
     def jv(self, v_hat, phi_hat, c):
-        phi = self.get_physical(phi_hat)
-        v   = self.get_physical(v_hat)
-        return (self.mk-c)*v_hat + nf.rfft(phi*v) / self.N
+        return (self.mk-c)*v_hat + self.product_hat(phi_hat, v_hat)
     
     def jacobian(self, u):
         phi_hat, c, B = self.build_phi_hat(u)

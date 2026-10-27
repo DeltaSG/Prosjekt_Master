@@ -32,8 +32,8 @@ class LSM():
                 # Adding copies of the wave so that it covers L
                 eta = np.tile(eta, m)
             eta_hat = -self.ddx * nf.fft(eta, axis=1)
-            # add (current) highest non-zero k test
-            nl_hat = - self.ddx * nf.fft(eta**2, axis=1)
+            eta_hat_full = nf.fft(eta, axis=1)
+            nl_hat = - self.ddx * dealiased_square_hat(eta_hat_full)
             dHdt_hat= nf.fft(np.gradient(eta, self.camera.dt, axis=0, edge_order=2), axis=1)
             # time derivative in Fourier space:
             # dt_f = 

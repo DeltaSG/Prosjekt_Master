@@ -1,6 +1,7 @@
 # Helper functions for pdes
 
 import numpy as np
+import numpy.fft as nf
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 from matplotlib.widgets import Slider
@@ -43,6 +44,23 @@ def pad(u_hat, N):
     out[..., :half]        = u_hat[..., :half]
     out[..., -(half-1):]   = u_hat[..., -(half-1):]   # Nyquist mode dropped
     return out
+
+def unpad(u_hat_pad, N):
+    """Truncates a (...,3N/2) spectrum back to (...,N), Nyquist mode zero."""
+    half = N//2
+    out = np.zeros(u_hat_pad.shape[:-1] +(N,), dtype=complex)
+    out[...,:half] = u_hat_pad[...,:half]
+    out[...,-(half-1):] = u_hat_pad[...,-(half-1):]
+    return out
+
+def dealiased_square_hat(u_hat):
+    """FFT of u**2 by the 3/2 rule"""
+    N = u_hat.shape[-1]
+    Np = 3*N//2
+    u_fine = nf.ifft(pad(u_hat,N), axis=-1).real * (Np/N)
+    sq_hat = nf.fft(u_fine**2, axis=-1)*N/Np
+    return unpad(sq_hat,N)
+
 
 def animate_solution(x, u, interval = 40):
     """Animates the solution u over the domain x"""

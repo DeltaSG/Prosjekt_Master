@@ -35,7 +35,7 @@ class Solver(ABC):
         """Return the Fourier symbol m(k) as an array"""
 
     def nonlinear_rhs(self, u_hat_in):
-        nl_hat = nf.fft(nf.ifft(u_hat_in)**2)
+        nl_hat = dealiased_square_hat(u_hat_in)
         return -0.5*self.ddx*nl_hat
 
     def rk4_step(self, u_hat_in, h):
