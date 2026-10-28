@@ -30,6 +30,11 @@ def whithamDispersion(k):
 def n_theory(k):
     return 0.5*np.ones_like(k)
 
+def ddt(u,dt):
+    """Fourth order stencil for the time derivative"""
+    return (-u[4:] + 8*(u[3:-1] - u[1:-3]) + u[:-4])/(12*dt)
+
+
 def make_x_array(N:int , L:float , symmetric:bool) -> np.ndarray:
     x = np.linspace(
         -L/2, L/2, N, endpoint=False

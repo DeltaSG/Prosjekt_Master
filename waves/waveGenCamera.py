@@ -39,7 +39,8 @@ class WavePacket(ABC):
             wavep.solve_w_continuation()
             phi0 = wavep.get_physical(wavep.phi_hat)
             twave = self.waveSolver(u0= phi0)
-            _, phi = twave.splitStep()
+            # _, phi = twave.splitStep()
+            _, phi = twave.ifrk4()
             
             H.append(phi)
         

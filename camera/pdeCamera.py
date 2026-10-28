@@ -72,6 +72,30 @@ class Solver(ABC):
         self.t, self.u = np.array(t_list), np.array(u_list)
         return np.array(t_list), np.array(u_list)
 
+
+    def ifrk4(self):
+        h  = self.camera.dt
+        E  = np.exp(-self.ddx*self.mk*h/2)
+        E2 = E*E
+        n_steps = int(round(self.T/h))
+
+        u_hat  = self.u0_hat.copy()
+        t_list = [0.0]
+        u_list = [self.u0.copy()]
+        for step in range(1, n_steps+1):
+            a = h*self.nonlinear_rhs(u_hat)
+            b = h*self.nonlinear_rhs(E*(u_hat + a/2))
+            c = h*self.nonlinear_rhs(E*u_hat + b/2)
+            d = h*self.nonlinear_rhs(E2*u_hat + E*c)
+            u_hat = E2*u_hat + (E2*a + 2*E*(b+c) + d)/6
+
+            if step % self.save_every == 0:
+                t_list.append(step*h)
+                u_list.append(nf.ifft(u_hat).real)
+
+        self.t, self.u = np.array(t_list), np.array(u_list)
+        return self.t, self.u
+
     def conservation(self):
             if not hasattr(self, "u"):
                 print("Solving PDE for u")

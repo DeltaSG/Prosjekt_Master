@@ -10,7 +10,7 @@ from camera.camera_file import Camera
 
 class LSM():
     """A class that takes in a tensor of data and uses the least squares method to estimate the symbols"""
-    def __init__(self, eta_list, camera:Camera, drop_frames:int = 1, stride:int = 1):
+    def __init__(self, eta_list, camera:Camera, drop_frames:int = 2, stride:int = 1):
         """LSM solver for the symbols. 
         Inputs: 
         Eta_list: A list containing the wave data 
@@ -28,7 +28,7 @@ class LSM():
         nl_hat_list  = []
         dHdt_hat_list= []
 
-        sl = slice(self.drop_frames, self.camera.N-self.drop_frames)
+        sl = slice(self.drop_frames,-self.drop_frames)
 
         for eta in self.eta_list:
             M = len(eta[0])
@@ -40,13 +40,17 @@ class LSM():
             eta_hat = -self.ddx * nf.fft(eta, axis=1)
             eta_hat_full = nf.fft(eta, axis=1)
             nl_hat = - self.ddx * dealiased_square_hat(eta_hat_full)
-            dHdt_hat= nf.fft(np.gradient(eta, self.camera.dt*self.stride, axis=0, edge_order=2), axis=1)
+            # dHdt_hat= nf.fft(np.gradient(eta, self.camera.dt*self.stride, axis=0, edge_order=2), axis=1)
+
             # time derivative in Fourier space:
             # dt_f = 
             #removing edge frames
             eta_hat_list.append(eta_hat[sl])
             nl_hat_list.append(nl_hat[sl])
-            dHdt_hat_list.append(dHdt_hat[sl])
+            # dHdt_hat_list.append(dHdt_hat[sl])
+            dHdt_hat= nf.fft(ddt(eta, self.camera.dt*self.stride), axis=1)
+            dHdt_hat_list.append(dHdt_hat)
+
 
         
         H = np.stack(eta_hat_list, axis=0)
