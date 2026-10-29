@@ -35,8 +35,8 @@ class SpectralNewton(ABC):
         return nf.irfft(self.N*phi_hat, n = self.N)
 
     def _height_weights(self):
-        w = np.zeros(self.M +1)
-        w[1::2] = 2.0
+        w = np.full(self.M +1, 2)
+        w[0] = 1.0
         if self.N%2 == 0 and self.M % 2 == 1: # Nyquist index M is odd: weight should be 1
             w[-1] = 1.0
         return w
@@ -71,7 +71,7 @@ class SpectralNewton(ABC):
         F[0] -= B
         
         mean_eq = phi_hat[0] - self.mean
-        amp_eq  = np.sum(self.hw.copy()*phi_hat) - amp
+        amp_eq  = np.sum(self.hw.copy()*phi_hat) - (amp + self.mean)
         
         return np.concatenate([
             np.real_if_close(F),
@@ -151,8 +151,10 @@ class SpectralNewton(ABC):
         c_sol , B_sol = self.u[-2], self.u[-1]
 
         phi_sol = self.get_physical(phi_hat)
-
-        print(f"amplitude = {(np.max(phi_sol) - np.min(phi_sol))/2}")
+        crest = np.max(phi_sol)
+        trough = np.min(phi_sol)
+        print(f"amplitude = {(crest - trough)/2}")
+        print(f"Crest amplitude = {crest- self.mean}")
         print(f"Wave speed c = {c_sol}")
         print(f"Constant B = {B_sol}")
         
@@ -241,7 +243,7 @@ def plot(u_list,names, N):
 if __name__ == '__main__':
 
     N = 2**6
-    amp = 0.05*2
+    amp = 1
     mean = 0.0
     P = 2*2*np.pi
     
@@ -249,12 +251,12 @@ if __name__ == '__main__':
 
     kdv = KdVNewton(P=P, target_amp= amp, mean= mean , camera=c1)
     kdv.solve_w_continuation(n_steps=10)
-    kdv.test_alias()
-    # kdv._plot_()
+    # kdv.test_alias()
+    kdv._plot_()
     
-    whitham = WhithamNewton(P, amp, mean, camera=c1)
-    whitham.solve_w_continuation()
-    whitham.test_alias()
+    # whitham = WhithamNewton(P, amp, mean, camera=c1)
+    # whitham.solve_w_continuation()
+    # whitham.test_alias()
 
     # fkdv = fKdVNewton(P,amp, mean, camera=c1, alpha= 2) # Same as KdV
     # fkdv.solve_w_continuation()

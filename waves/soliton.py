@@ -23,6 +23,58 @@ def cnoidal(x,t,c,H,L,mean,m):
     eta = H*cn**2 + mean
     return eta
 
+import numpy as np
+from scipy.special import ellipj, ellipk, ellipe
+from scipy.optimize import brentq
+
+
+def kdv_cnoidal(P, crest, mean,x):
+    """
+    Cnoidal solution for the KdV traveling-wave equation
+
+        (1/6) phi_xx + (1-c) phi + phi**2/2 = B
+
+    Assumes phi(0) = crest and mean(phi) = mean.
+    """
+
+    def parameters(m):
+        K = ellipk(m)
+        E = ellipe(m)
+
+        kappa = 2 * K / P
+        b = 2 * m * kappa**2
+
+        # Mean of cn(u|m)**2 over one period
+        q = (E - (1 - m) * K) / (m * K)
+
+        # phi = a + b*cn**2
+        a = mean - b * q
+
+        return kappa, a, b, q
+
+    def amplitude_residual(m):
+        kappa, a, b, q = parameters(m)
+        return a + b - crest
+
+    # Find m from period, mean and crest value
+    m = brentq(
+        amplitude_residual,
+        1e-7,
+        1 - 1e-7
+    )
+
+    kappa, a, b, q = parameters(m)
+
+    # x = np.linspace(0, P, 1024, endpoint=False)
+    _, cn, _, _ = ellipj(kappa * x, m)
+
+    phi = a + b * cn**2
+
+    c = 1 + a + (2 / 3) * kappa**2 * (2 * m - 1)
+
+    return phi, c, m
+
+
 if __name__ == '__main__':
     L = 2
     mean = 0
