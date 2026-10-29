@@ -14,12 +14,13 @@ from camera.pdeCamera import *
 from camera.lsmCamera import LSM
 
 class WavePacket(ABC):
-    def __init__(self, P_list, amp_list, mean_list, camera:Camera, T):
+    def __init__(self, P_list, amp_list, mean_list, camera:Camera, T, save_every:int = 1):
         self.Ps = P_list
         self.amps = amp_list
         self.means = mean_list
         self.camera = camera
         self.T = T
+        self.save_every = save_every
         
     @abstractmethod
     def waveProfile(self,P, amp, mean):
@@ -53,7 +54,7 @@ class KdVPacket(WavePacket):
         return KdVNewton(P=P, target_amp=amp, mean = mean,camera=self.camera)
     
     def waveSolver(self, u0):
-        return KdV(camera=self.camera, T = self.T, u0=u0)
+        return KdV(camera=self.camera, T = self.T, u0=u0,save_every=self.save_every)
 
 class fKdVPacket(WavePacket):
     def __init__(self, P, N, amp_list, mean_list, dt, T, alpha):
@@ -64,11 +65,11 @@ class fKdVPacket(WavePacket):
         return fKdVNewton(P=P, target_amp=amp, mean = mean,camera=self.camera, alpha=self.alpha)
 
     def waveSolver(self, u0):
-        return fKdV( camera=self.camera, T = self.T, u0=u0, alpha=self.alpha)
+        return fKdV( camera=self.camera, T = self.T, u0=u0, alpha=self.alpha, save_every=self.save_every)
 
 class WhithamPacket(WavePacket):
     def waveProfile(self,P, amp, mean):
         return WhithamNewton(P=P, target_amp=amp, mean = mean, camera=self.camera)
     
     def waveSolver(self, u0):
-        return Whitham(camera=self.camera, T = self.T, u0=u0)
+        return Whitham(camera=self.camera, T = self.T, u0=u0, save_every=self.save_every)
