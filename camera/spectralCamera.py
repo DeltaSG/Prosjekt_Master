@@ -112,7 +112,7 @@ class SpectralNewton(ABC):
             alpha *= 0.5
         return u_trial
     
-    def newton(self, u0, amp, tol = 1e-13, maxit = 50):
+    def newton(self, u0, amp, tol = 1e-15, maxit = 50):
         u = u0.copy()
 
         for _ in range(maxit):
