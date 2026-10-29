@@ -28,7 +28,7 @@ from scipy.special import ellipj, ellipk, ellipe
 from scipy.optimize import brentq
 
 
-def kdv_cnoidal(P, crest, mean,x):
+def kdv_cnoidal(P, crest, mean,x,t):
     """
     Cnoidal solution for the KdV traveling-wave equation
 
@@ -62,15 +62,14 @@ def kdv_cnoidal(P, crest, mean,x):
         1e-7,
         1 - 1e-7
     )
+    
 
     kappa, a, b, q = parameters(m)
-
-    # x = np.linspace(0, P, 1024, endpoint=False)
-    _, cn, _, _ = ellipj(kappa * x, m)
+    c = 1 + a + (2 / 3) * kappa**2 * (2 * m - 1)
+    X,T = np.meshgrid(x,t)
+    _, cn, _, _ = ellipj(kappa*(X - c*T), m)
 
     phi = a + b * cn**2
-
-    c = 1 + a + (2 / 3) * kappa**2 * (2 * m - 1)
 
     return phi, c, m
 
