@@ -11,6 +11,7 @@ class SpectralNewton(ABC):
         self.P          = P 
         self.target_amp        = target_amp 
         self.mean       = mean
+        self.camera = camera
         self.N          = round(P/camera.dx)
         assert abs(self.N * camera.dx - P) < 1e-9, "P/dx must be an integer"
         self.k          = 2*np.pi*nf.rfftfreq(self.N,d=camera.dx)
@@ -35,9 +36,9 @@ class SpectralNewton(ABC):
         return nf.irfft(self.N*phi_hat, n = self.N)
 
     def _height_weights(self):
-        w = np.full(self.M +1, 2)
+        w = np.full(self.M +1, 2.0)
         w[0] = 1.0
-        if self.N%2 == 0 and self.M % 2 == 1: # Nyquist index M is odd: weight should be 1
+        if (self.N%2 == 0) and (self.M % 2 == 1): # Nyquist index M is odd: weight should be 1
             w[-1] = 1.0
         return w
 
@@ -71,7 +72,7 @@ class SpectralNewton(ABC):
         F[0] -= B
         
         mean_eq = phi_hat[0] - self.mean
-        amp_eq  = np.sum(self.hw.copy()*phi_hat) - (amp + self.mean)
+        amp_eq  = np.sum(self.hw*phi_hat) - (amp + self.mean)
         
         return np.concatenate([
             np.real_if_close(F),
@@ -210,7 +211,7 @@ class SolitonNewton(SpectralNewton):
     def solve_soliton(self, amp):
         # exact KdV guess for 1 - k^2/6 (see below); Newton polishes it
         kappa = np.sqrt(amp/2)
-        x = self.dx*np.arange(self.N)
+        x = self.camera.dx*np.arange(self.N)
         d = (x + self.P/2) % self.P - self.P/2    # distance to nearest crest
         phi0 = nf.rfft(amp/np.cosh(kappa*d)**2)/self.N
         u0 = np.concatenate([phi0.real, [1 + amp/3, 0.0]])

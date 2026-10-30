@@ -73,6 +73,9 @@ def kdv_cnoidal(P, crest, mean,x,t):
 
     return phi, c, m
 
+def soliton(x,A, x0):
+     kappa = np.sqrt(A/2)
+     return A * 1/(np.cosh(kappa*(x - x0))**2)
 
 if __name__ == '__main__':
     L = 2
