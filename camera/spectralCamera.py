@@ -38,7 +38,7 @@ class SpectralNewton(ABC):
     def _height_weights(self):
         w = np.full(self.M +1, 2.0)
         w[0] = 1.0
-        if (self.N%2 == 0) and (self.M % 2 == 1): # Nyquist index M is odd: weight should be 1
+        if (self.N%2 == 0): # Nyquist index M is odd: weight should be 1
             w[-1] = 1.0
         return w
 
