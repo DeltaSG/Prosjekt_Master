@@ -60,7 +60,8 @@ def kdv_cnoidal(P, crest, mean,x,t):
     m = brentq(
         amplitude_residual,
         1e-7,
-        1 - 1e-7
+        1 - 1e-7,
+        xtol= 1e-16, rtol = 4*np.finfo(float).eps
     )
     
 

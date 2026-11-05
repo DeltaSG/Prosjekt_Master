@@ -120,10 +120,14 @@ class SpectralNewton(ABC):
             F = self.residual(u, amp)
             err = np.linalg.norm(F)
 
-            if err < tol: return u
-
             J = self.jacobian(u)
             delta = np.linalg.solve(J, -F)
+
+            if (err < tol): # controll error
+                if np.linalg.norm(delta) < tol*(1+np.linalg.norm(u)): # controll next step
+                    return u
+
+            
             u = self.linesearch(u, amp, err, delta)
         raise RuntimeError('No convergence')
 
