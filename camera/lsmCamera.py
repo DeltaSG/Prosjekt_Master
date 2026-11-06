@@ -5,7 +5,7 @@ import numpy as np
 import numpy.fft as nf
 import pandas as pd
 import matplotlib.pyplot as plt
-from solvers.help import *
+from camera.help import *
 from camera.camera_file import Camera
 
 class LSM():

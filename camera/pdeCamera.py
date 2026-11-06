@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 
 from camera.camera_file import Camera
 from camera.spectralCamera import *
-from solvers.help import *
+from camera.help import *
 
 class Solver(ABC):
     def __init__(self, camera: Camera, T,u0 = None, u0_hat = None, save_every:int = 1):
