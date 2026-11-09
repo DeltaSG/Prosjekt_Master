@@ -134,15 +134,17 @@ class SpectralNewton(ABC):
     def solve_w_continuation(self, n_steps= 50, u0 = None, amp0 = None):
         if u0 is not None:
             u = u0
-        else: u = np.zeros(self.M+3)
-        u[-2] = self.mk[1]
+        else: 
+            u = np.zeros(self.M+3)
+            u[-2] = self.mk[1]  
 
         if amp0 is not None:
             start = amp0
-        else:  start = self.target_amp/n_steps
+        else:  
+            start = self.target_amp/n_steps
+            u[1] = start/2 #updating target amp
         
         for amp in np.linspace(start, self.target_amp, n_steps):
-            u[1] = amp/2 #updating target amp
             u = self.newton(u, amp)
 
         self.u = u

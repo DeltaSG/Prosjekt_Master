@@ -32,7 +32,7 @@ class LSM():
 
         for eta in self.eta_list:
             M = len(eta[0])
-            assert self.camera.N % M == 0, f" {N = } is not divisible by {M = }"
+            assert self.camera.N % M == 0, f" {self.camera.N = } is not divisible by {M = }"
             m = self.camera.N // M
             if m != 1:
                 # Adding copies of the wave so that it covers L
