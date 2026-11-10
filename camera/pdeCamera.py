@@ -11,10 +11,10 @@ class Solver(ABC):
     def __init__(self, camera: Camera, T,u0 = None, u0_hat = None, save_every:int = 1):
         if u0 is not None:
             self.u0 = u0
-            self.u0_hat = nf.fft(u0)
+            self.u0_hat = nf.fft(u0, norm='forward')
         elif u0_hat is not None:
             self.u0_hat = u0_hat
-            self.u0 = nf.ifft(u0_hat)
+            self.u0 = nf.ifft(u0_hat, norm='forward')
         else: raise ValueError("u0 or u0_hat must be given.")
 
         self.N  = len(self.u0)
@@ -67,7 +67,7 @@ class Solver(ABC):
 
             if step_count % self.save_every == 0 or t_current >= self.T - 1e-14:
                         t_list.append(t_current)
-                        u_list.append(np.fft.ifft(u_hat).real)
+                        u_list.append(np.fft.ifft(u_hat, norm='forward').real)
 
         self.t, self.u = np.array(t_list), np.array(u_list)
         return np.array(t_list), np.array(u_list)
@@ -91,7 +91,7 @@ class Solver(ABC):
 
             if step % self.save_every == 0:
                 t_list.append(step*h)
-                u_list.append(nf.ifft(u_hat).real)
+                u_list.append(nf.ifft(u_hat, norm='forward').real)
 
         self.t, self.u = np.array(t_list), np.array(u_list)
         return self.t, self.u

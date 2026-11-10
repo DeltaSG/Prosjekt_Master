@@ -33,7 +33,7 @@ class SpectralNewton(ABC):
         return phi_hat, c, B
     
     def get_physical(self, phi_hat):
-        return nf.irfft(self.N*phi_hat, n = self.N)
+        return nf.irfft(phi_hat, n = self.N, norm='forward')
 
     def _height_weights(self):
         w = np.full(self.M +1, 2.0)
@@ -53,9 +53,9 @@ class SpectralNewton(ABC):
         a[:M] = a_hat[:M]
         b[:M] = b_hat[:M]
 
-        a_fine = nf.irfft(Np*a, n=Np)
-        b_fine = nf.irfft(Np*b, n=Np)
-        p_hat = nf.rfft(a_fine*b_fine)/Np
+        a_fine = nf.irfft(a, n=Np, norm='forward')
+        b_fine = nf.irfft(b, n=Np, norm='forward')
+        p_hat = nf.rfft(a_fine*b_fine, norm='forward')
 
         out = np.zeros(M+1, dtype=complex)
         out[:M] = p_hat[:M]
@@ -75,7 +75,7 @@ class SpectralNewton(ABC):
         amp_eq  = np.sum(self.hw*phi_hat) - (amp + self.mean)
         
         return np.concatenate([
-            np.real_if_close(F),
+            np.real(F),
             [mean_eq],
             [amp_eq]
         ])

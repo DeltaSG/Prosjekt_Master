@@ -37,8 +37,8 @@ class LSM():
             if m != 1:
                 # Adding copies of the wave so that it covers L
                 eta = np.tile(eta, m)
-            eta_hat = -self.ddx * nf.fft(eta, axis=1)
-            eta_hat_full = nf.fft(eta, axis=1)
+            eta_hat = -self.ddx * nf.fft(eta, axis=1, norm='forward')
+            eta_hat_full = nf.fft(eta, axis=1, norm='forward')
             nl_hat = - self.ddx * dealiased_square_hat(eta_hat_full)
             # dHdt_hat= nf.fft(np.gradient(eta, self.camera.dt*self.stride, axis=0, edge_order=2), axis=1)
 
@@ -48,7 +48,7 @@ class LSM():
             eta_hat_list.append(eta_hat[sl])
             nl_hat_list.append(nl_hat[sl])
             # dHdt_hat_list.append(dHdt_hat[sl])
-            dHdt_hat= nf.fft(ddt(eta, self.camera.dt*self.stride), axis=1)
+            dHdt_hat= nf.fft(ddt(eta, self.camera.dt*self.stride), axis=1, norm='forward')
             dHdt_hat_list.append(dHdt_hat)
 
 

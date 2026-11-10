@@ -62,8 +62,8 @@ def dealiased_square_hat(u_hat):
     """FFT of u**2 by the 3/2 rule"""
     N = u_hat.shape[-1]
     Np = 3*N//2
-    u_fine = nf.ifft(pad(u_hat,N), axis=-1).real * (Np/N)
-    sq_hat = nf.fft(u_fine**2, axis=-1)*N/Np
+    u_fine = nf.ifft(pad(u_hat,N), axis=-1, norm='forward').real
+    sq_hat = nf.fft(u_fine**2, axis=-1, norm='forward')
     return unpad(sq_hat,N)
 
 
@@ -166,8 +166,8 @@ def conservationOnL(N,L,f= lambda x: 0.5*np.cos(2*x),g = lambda x: np.sin(x),Lk 
 
     mk = Lk(k)
 
-    u = np.fft.fft(f(x))
-    v = np.fft.fft(g(x))
+    u = np.fft.fft(f(x), norm='forward')
+    v = np.fft.fft(g(x), norm='forward')
 
     s1 = np.inner(mk*u, v)
     s2 = np.inner(u, mk*v)
@@ -186,9 +186,9 @@ def l2(u,dx):
 def hamiltonian(u,mk,dx):
     """Working using Lu_x -> for KdV L = 1-k**2/6"""
     U = np.asarray(u)
-    u_hat = np.fft.fft(U,axis=-1)
+    u_hat = np.fft.fft(U,axis=-1, norm='forward')
     lu_hat = mk*u_hat
-    lu = np.fft.ifft(lu_hat, axis=-1)
+    lu = np.fft.ifft(lu_hat, axis=-1, norm='forward')
 
     H2 = 0.5*dx*np.sum(U*lu, axis=-1)
     H3 = (dx/6)*np.sum(U**3, axis = -1)
